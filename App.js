@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -107,7 +108,8 @@ export default function App() {
     setIsThinking(true);
     setActivity("");
     try {
-      const response = await fetch(`${AI_HELPER_URL}/ask`, {
+      const endpoint = Platform.OS === "web" ? "/api/ask" : `${AI_HELPER_URL}/ask`;
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(answers),
@@ -124,7 +126,9 @@ export default function App() {
     } catch {
       Alert.alert(
         "Sunventure could not answer",
-        "Please check your key, Wi-Fi, and that the Sunventure helper is running on the computer.",
+        Platform.OS === "web"
+          ? "Please check the online AI function and try again."
+          : "Please check your key, Wi-Fi, and that the Sunventure helper is running on the computer.",
       );
     } finally {
       setIsThinking(false);
@@ -134,9 +138,10 @@ export default function App() {
   const timeText = answers.time.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar style="dark" />
-      <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.webShell}>
+      <SafeAreaView style={styles.safe}>
+        <StatusBar style="dark" />
+        <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.logo}>☀ Sunventure</Text>
         <Text style={styles.tagline}>A simple idea for a brighter day.</Text>
 
@@ -244,13 +249,21 @@ export default function App() {
             </Pressable>
           </View>
         )}
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFF8E8" },
+  webShell: Platform.select({
+    web: { flex: 1, alignItems: "center", backgroundColor: "#E8E3D9" },
+    default: { flex: 1 },
+  }),
+  safe: Platform.select({
+    web: { flex: 1, width: "100%", maxWidth: 400, backgroundColor: "#FFF8E8" },
+    default: { flex: 1, backgroundColor: "#FFF8E8" },
+  }),
   container: { flexGrow: 1, padding: 24, paddingTop: 36, justifyContent: "center" },
   logo: { color: "#F28C28", fontSize: 27, fontWeight: "800", letterSpacing: 0.3 },
   tagline: { color: "#675F53", fontSize: 16, marginTop: 4, marginBottom: 22 },
