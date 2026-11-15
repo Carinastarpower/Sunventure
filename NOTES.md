@@ -11,6 +11,11 @@ Use two Terminal windows from this folder:
 
 The phone and computer must be on the same Wi-Fi. The helper uses the computer address `192.168.1.163`. If that address changes, update `AI_HELPER_URL` in `App.js`. Do not use an Expo tunnel for the AI helper; use LAN mode.
 
+## Try the MVP in 2 steps
+
+1. In two terminals, run `npm run helper` and `npx expo start --lan`, then open the app in Expo Go.
+2. Tap `Get started`, choose the interest, company, language, place, and time, then tap `Find A Activity` to receive one short AI activity.
+
 Expo Go SDK: 58
 OpenAI model: `gpt-5.6-luna`
 
