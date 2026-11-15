@@ -40,7 +40,7 @@ const translations = {
     welcomeTitle: "Find something good to do.",
     welcomeBody: "Choose a language, answer five simple AI questions, and Sunventure will suggest one activity.",
     safety: "✓ We will not ask for personal information.",
-    getStarted: "Get started",
+    continue: "Continue",
     languageEyebrow: "LANGUAGE",
     languageQuestion: "What language do you prefer?",
     languageBody: "Choose one language for your questions and activity idea.",
@@ -75,7 +75,7 @@ const translations = {
     welcomeTitle: "找点有趣的事做吧。",
     welcomeBody: "选择语言，回答五个简单的 AI 问题，Sunventure 会为你推荐一项活动。",
     safety: "✓ 我们不会询问个人信息。",
-    getStarted: "开始",
+    continue: "继续",
     languageEyebrow: "语言",
     languageQuestion: "你喜欢使用哪种语言？",
     languageBody: "为你的问题和活动建议选择一种语言。",
@@ -110,7 +110,7 @@ const translations = {
     welcomeTitle: "Encuentra algo bueno que hacer.",
     welcomeBody: "Elige un idioma, responde cinco preguntas sencillas de IA y Sunventure sugerirá una actividad.",
     safety: "✓ No pediremos información personal.",
-    getStarted: "Comenzar",
+    continue: "Continuar",
     languageEyebrow: "IDIOMA",
     languageQuestion: "¿Qué idioma prefieres?",
     languageBody: "Elige un idioma para tus preguntas y tu idea de actividad.",
@@ -320,7 +320,7 @@ export default function App() {
               <Text style={styles.body}>{t.welcomeBody}</Text>
               <Text style={styles.safety}>{t.safety}</Text>
               <Pressable style={styles.primaryButton} onPress={startQuestions}>
-                <Text style={styles.primaryText}>{t.getStarted}</Text>
+                <Text style={styles.primaryText}>{t.continue}</Text>
               </Pressable>
             </View>
           )}
