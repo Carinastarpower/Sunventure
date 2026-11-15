@@ -192,8 +192,8 @@ export default function App() {
         const parsed = JSON.parse(saved);
         setAnswers((current) => ({
           ...current,
-          ...parsed,
           time: parsed.time ? new Date(parsed.time) : current.time,
+          language: "",
         }));
         if (Array.isArray(parsed.questionAnswers)) setQuestionAnswers(parsed.questionAnswers);
       } catch {
@@ -328,8 +328,12 @@ export default function App() {
           {screen === "language" && (
             <View style={styles.card}>
               <Text style={styles.eyebrow}>{t.languageEyebrow}</Text>
-              <Text style={styles.title}>{t.languageQuestion}</Text>
-              <Text style={styles.body}>{t.languageBody}</Text>
+              <Text style={styles.title}>
+                {answers.language ? t.languageQuestion : "What language do you prefer? / 你喜欢使用哪种语言？ / ¿Qué idioma prefieres?"}
+              </Text>
+              <Text style={styles.body}>
+                {answers.language ? t.languageBody : "Choose one language / 请选择一种语言 / Elige un idioma"}
+              </Text>
               <View style={styles.choices}>
                 {languageOptions.map((item) => (
                   <Choice key={item.value} label={item.label} selected={answers.language === item.value} onPress={() => chooseLanguage(item.value)} />
