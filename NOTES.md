@@ -37,7 +37,7 @@ To test the production-shaped web bundle locally, run `npx expo export -p web` a
 ## Done
 
 - Created the SDK 58 Expo app.
-- Added one-question-at-a-time flow: a fixed language choice followed by five different AI-generated questions, then reminder time and the `Find A Activity` button.
+- Added a language page as the first screen. After choosing English, Chinese, or Spanish, the original welcome page and the rest of the app use that language. The flow then asks five different AI-generated questions one at a time, followed by reminder time and the `Find A Activity` button.
 - Added local phone storage and a back button on each step.
 - Added the computer-only Node helper. It reads `.env`, sends the full `BRIEF.md` instructions to OpenAI, and never puts the key in the app.
 - Added Expo web support, the centered phone frame, the Vercel AI function, and Vercel's single-page-app rewrite configuration.

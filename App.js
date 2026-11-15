@@ -33,6 +33,114 @@ const languageOptions = [
   { value: "Spanish", label: "español 🇪🇸" },
 ];
 
+const translations = {
+  English: {
+    tagline: "A simple idea for a brighter day.",
+    welcomeEyebrow: "WELCOME",
+    welcomeTitle: "Find something good to do.",
+    welcomeBody: "Choose a language, answer five simple AI questions, and Sunventure will suggest one activity.",
+    safety: "✓ We will not ask for personal information.",
+    getStarted: "Get started",
+    languageEyebrow: "LANGUAGE",
+    languageQuestion: "What language do you prefer?",
+    languageBody: "Choose one language for your questions and activity idea.",
+    back: "‹ Back",
+    questionEyebrow: (number) => `QUESTION ${number} OF 5 · YOUR IDEAS`,
+    thinking: "Thinking of a question…",
+    inputPlaceholder: "Type your answer",
+    next: "Next",
+    oneQuestion: "One simple question at a time.",
+    reminderEyebrow: "REMINDER",
+    reminderTitle: "When would you like to do it?",
+    reminderBody: "Sunventure can remind you at this time.",
+    changeTime: "Change time",
+    findActivity: "Find A Activity",
+    useAnswers: "The AI uses all six answers to choose one activity.",
+    resultEyebrow: "YOUR SUNVENTURE IDEA",
+    resultTitle: "Try this:",
+    reminderSet: (time) => `✓ Your reminder is set for ${time}.`,
+    differentIdea: "Want a different idea? Go back and change an answer.",
+    tryAnother: "Try another idea",
+    questionErrorTitle: "Sunventure could not ask the next question",
+    answerErrorTitle: "Sunventure could not answer",
+    webError: "Please check the online AI function and try again.",
+    nativeQuestionError: "Please check your Wi-Fi and that the Sunventure helper is running on the computer.",
+    nativeAnswerError: "Please check your key, Wi-Fi, and that the Sunventure helper is running on the computer.",
+    notificationTitle: "Sunventure reminder",
+    notificationBody: (title) => `It is time for ${title}.`,
+  },
+  Chinese: {
+    tagline: "让每一天更明亮的简单点子。",
+    welcomeEyebrow: "欢迎",
+    welcomeTitle: "找点有趣的事做吧。",
+    welcomeBody: "选择语言，回答五个简单的 AI 问题，Sunventure 会为你推荐一项活动。",
+    safety: "✓ 我们不会询问个人信息。",
+    getStarted: "开始",
+    languageEyebrow: "语言",
+    languageQuestion: "你喜欢使用哪种语言？",
+    languageBody: "为你的问题和活动建议选择一种语言。",
+    back: "‹ 返回",
+    questionEyebrow: (number) => `第 ${number} 个问题，共 5 个 · 你的想法`,
+    thinking: "正在想一个问题……",
+    inputPlaceholder: "输入你的回答",
+    next: "下一步",
+    oneQuestion: "一次回答一个简单问题。",
+    reminderEyebrow: "提醒",
+    reminderTitle: "你想什么时候做这件事？",
+    reminderBody: "Sunventure 可以在这个时间提醒你。",
+    changeTime: "更改时间",
+    findActivity: "寻找一个活动",
+    useAnswers: "AI 会使用你的六个回答来选择一项活动。",
+    resultEyebrow: "你的 SUNVENTURE 点子",
+    resultTitle: "试试这个：",
+    reminderSet: (time) => `✓ 已为你设置 ${time} 的提醒。`,
+    differentIdea: "想换一个点子？返回并修改答案。",
+    tryAnother: "再试一个点子",
+    questionErrorTitle: "Sunventure 无法提出下一个问题",
+    answerErrorTitle: "Sunventure 无法回答",
+    webError: "请检查在线 AI 功能，然后再试一次。",
+    nativeQuestionError: "请检查 Wi-Fi，并确认电脑上的 Sunventure helper 正在运行。",
+    nativeAnswerError: "请检查密钥、Wi-Fi，并确认电脑上的 Sunventure helper 正在运行。",
+    notificationTitle: "Sunventure 提醒",
+    notificationBody: (title) => `现在是进行${title}的时间。`,
+  },
+  Spanish: {
+    tagline: "Una idea sencilla para un día más alegre.",
+    welcomeEyebrow: "BIENVENIDO",
+    welcomeTitle: "Encuentra algo bueno que hacer.",
+    welcomeBody: "Elige un idioma, responde cinco preguntas sencillas de IA y Sunventure sugerirá una actividad.",
+    safety: "✓ No pediremos información personal.",
+    getStarted: "Comenzar",
+    languageEyebrow: "IDIOMA",
+    languageQuestion: "¿Qué idioma prefieres?",
+    languageBody: "Elige un idioma para tus preguntas y tu idea de actividad.",
+    back: "‹ Atrás",
+    questionEyebrow: (number) => `PREGUNTA ${number} DE 5 · TUS IDEAS`,
+    thinking: "Pensando en una pregunta…",
+    inputPlaceholder: "Escribe tu respuesta",
+    next: "Siguiente",
+    oneQuestion: "Una pregunta sencilla a la vez.",
+    reminderEyebrow: "RECORDATORIO",
+    reminderTitle: "¿Cuándo te gustaría hacerlo?",
+    reminderBody: "Sunventure puede recordártelo a esta hora.",
+    changeTime: "Cambiar hora",
+    findActivity: "Buscar una actividad",
+    useAnswers: "La IA usará tus seis respuestas para elegir una actividad.",
+    resultEyebrow: "TU IDEA SUNVENTURE",
+    resultTitle: "Prueba esto:",
+    reminderSet: (time) => `✓ Tu recordatorio está programado para las ${time}.`,
+    differentIdea: "¿Quieres otra idea? Regresa y cambia una respuesta.",
+    tryAnother: "Probar otra idea",
+    questionErrorTitle: "Sunventure no pudo hacer la siguiente pregunta",
+    answerErrorTitle: "Sunventure no pudo responder",
+    webError: "Revisa la función de IA en línea e inténtalo de nuevo.",
+    nativeQuestionError: "Revisa tu Wi-Fi y confirma que Sunventure helper esté funcionando en la computadora.",
+    nativeAnswerError: "Revisa tu clave, Wi-Fi y confirma que Sunventure helper esté funcionando en la computadora.",
+    notificationTitle: "Recordatorio de Sunventure",
+    notificationBody: (title) => `Es hora de ${title}.`,
+  },
+};
+
 async function requestAI(body) {
   const endpoint = Platform.OS === "web" ? "/api/ask" : `${AI_HELPER_URL}/ask`;
   const response = await fetch(endpoint, {
@@ -58,16 +166,16 @@ function Choice({ label, selected, onPress }) {
   );
 }
 
-function BackButton({ onPress }) {
+function BackButton({ onPress, label }) {
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={styles.backButton}>
-      <Text style={styles.backText}>‹ Back</Text>
+      <Text style={styles.backText}>{label}</Text>
     </Pressable>
   );
 }
 
 export default function App() {
-  const [screen, setScreen] = useState("welcome");
+  const [screen, setScreen] = useState("language");
   const [answers, setAnswers] = useState({ language: "", time: new Date() });
   const [questionAnswers, setQuestionAnswers] = useState([]);
   const [question, setQuestion] = useState("");
@@ -110,12 +218,12 @@ export default function App() {
       setQuestionNumber(nextNumber);
     } catch {
       Alert.alert(
-        "Sunventure could not ask the next question",
+        translations[language].questionErrorTitle,
         Platform.OS === "web"
-          ? "Please check the online AI function and try again."
-          : "Please check your Wi-Fi and that the Sunventure helper is running on the computer.",
+          ? translations[language].webError
+          : translations[language].nativeQuestionError,
       );
-      setScreen("language");
+      setScreen("welcome");
     } finally {
       setIsThinking(false);
     }
@@ -124,7 +232,14 @@ export default function App() {
   function chooseLanguage(language) {
     setAnswers((current) => ({ ...current, language }));
     setQuestionAnswers([]);
-    loadNextQuestion({ language, previousAnswers: [], askedQuestions: [], nextNumber: 1 });
+    setQuestion("");
+    setQuestionNumber(0);
+    setAnswer("");
+    setScreen("welcome");
+  }
+
+  function startQuestions() {
+    loadNextQuestion({ language: answers.language, previousAnswers: [], askedQuestions: [], nextNumber: 1 });
   }
 
   async function submitAnswer() {
@@ -152,7 +267,7 @@ export default function App() {
     const reminderTime = new Date(answers.time);
     if (reminderTime <= new Date()) reminderTime.setDate(reminderTime.getDate() + 1);
     await Notifications.scheduleNotificationAsync({
-      content: { title: "Sunventure reminder", body: `It is time for ${title}.` },
+      content: { title: t.notificationTitle, body: t.notificationBody(title) },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: reminderTime,
@@ -176,16 +291,17 @@ export default function App() {
       setScreen("result");
     } catch {
       Alert.alert(
-        "Sunventure could not answer",
+        t.answerErrorTitle,
         Platform.OS === "web"
-          ? "Please check the online AI function and try again."
-          : "Please check your key, Wi-Fi, and that the Sunventure helper is running on the computer.",
+          ? t.webError
+          : t.nativeAnswerError,
       );
     } finally {
       setIsThinking(false);
     }
   }
 
+  const t = translations[answers.language] || translations.English;
   const timeText = answers.time.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
   return (
@@ -194,26 +310,26 @@ export default function App() {
         <StatusBar style="dark" />
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.logo}>☀ Sunventure</Text>
-          <Text style={styles.tagline}>A simple idea for a brighter day.</Text>
+          <Text style={styles.tagline}>{t.tagline}</Text>
 
           {screen === "welcome" && (
             <View style={styles.card}>
-              <Text style={styles.eyebrow}>WELCOME</Text>
-              <Text style={styles.title}>Find something good to do.</Text>
-              <Text style={styles.body}>Choose a language, answer five simple AI questions, and Sunventure will suggest one activity.</Text>
-              <Text style={styles.safety}>✓ We will not ask for personal information.</Text>
-              <Pressable style={styles.primaryButton} onPress={() => setScreen("language")}>
-                <Text style={styles.primaryText}>Get started</Text>
+              <BackButton onPress={() => setScreen("language")} label={t.back} />
+              <Text style={styles.eyebrow}>{t.welcomeEyebrow}</Text>
+              <Text style={styles.title}>{t.welcomeTitle}</Text>
+              <Text style={styles.body}>{t.welcomeBody}</Text>
+              <Text style={styles.safety}>{t.safety}</Text>
+              <Pressable style={styles.primaryButton} onPress={startQuestions}>
+                <Text style={styles.primaryText}>{t.getStarted}</Text>
               </Pressable>
             </View>
           )}
 
           {screen === "language" && (
             <View style={styles.card}>
-              <BackButton onPress={() => setScreen("welcome")} />
-              <Text style={styles.eyebrow}>QUESTION 1 OF 6 · LANGUAGE</Text>
-              <Text style={styles.title}>What language do you prefer?</Text>
-              <Text style={styles.body}>Choose one language for your questions and activity idea.</Text>
+              <Text style={styles.eyebrow}>{t.languageEyebrow}</Text>
+              <Text style={styles.title}>{t.languageQuestion}</Text>
+              <Text style={styles.body}>{t.languageBody}</Text>
               <View style={styles.choices}>
                 {languageOptions.map((item) => (
                   <Choice key={item.value} label={item.label} selected={answers.language === item.value} onPress={() => chooseLanguage(item.value)} />
@@ -224,10 +340,10 @@ export default function App() {
 
           {screen === "aiQuestion" && (
             <View style={styles.card}>
-              <BackButton onPress={() => setScreen("language")} />
-              <Text style={styles.eyebrow}>QUESTION {questionNumber + 1} OF 6 · YOUR IDEAS</Text>
+              <BackButton onPress={() => setScreen("welcome")} label={t.back} />
+              <Text style={styles.eyebrow}>{t.questionEyebrow(questionNumber)}</Text>
               {isThinking ? (
-                <Text style={styles.title}>Thinking of a question…</Text>
+                <Text style={styles.title}>{t.thinking}</Text>
               ) : (
                 <>
                   <Text style={styles.title}>{question}</Text>
@@ -235,50 +351,51 @@ export default function App() {
                     accessibilityLabel="Your answer"
                     value={answer}
                     onChangeText={setAnswer}
-                    placeholder="Type your answer"
+                    placeholder={t.inputPlaceholder}
                     placeholderTextColor="#998F80"
                     multiline
                     style={styles.answerInput}
                   />
                   <Pressable disabled={!answer.trim()} style={[styles.primaryButton, !answer.trim() && styles.disabled]} onPress={submitAnswer}>
-                    <Text style={styles.primaryText}>Next</Text>
+                    <Text style={styles.primaryText}>{t.next}</Text>
                   </Pressable>
                 </>
               )}
-              <Text style={styles.smallNote}>One simple question at a time.</Text>
+              <Text style={styles.smallNote}>{t.oneQuestion}</Text>
             </View>
           )}
 
           {screen === "time" && (
             <View style={styles.card}>
               <BackButton onPress={() => setScreen("aiQuestion")} />
-              <Text style={styles.eyebrow}>REMINDER</Text>
-              <Text style={styles.title}>When would you like to do it?</Text>
-              <Text style={styles.body}>Sunventure can remind you at this time.</Text>
+              <BackButton onPress={() => setScreen("aiQuestion")} label={t.back} />
+              <Text style={styles.eyebrow}>{t.reminderEyebrow}</Text>
+              <Text style={styles.title}>{t.reminderTitle}</Text>
+              <Text style={styles.body}>{t.reminderBody}</Text>
               <Pressable style={styles.timeButton} onPress={() => setShowTimePicker(true)}>
                 <Text style={styles.timeText}>⏰ {timeText}</Text>
-                <Text style={styles.changeText}>Change time</Text>
+                <Text style={styles.changeText}>{t.changeTime}</Text>
               </Pressable>
               {showTimePicker && (
                 <DateTimePicker value={answers.time} mode="time" onChange={(_, value) => { setShowTimePicker(false); if (value) setAnswers((current) => ({ ...current, time: value })); }} />
               )}
               <Pressable disabled={isThinking} style={[styles.primaryButton, isThinking && styles.disabled]} onPress={findActivity}>
-                <Text style={styles.primaryText}>{isThinking ? "Thinking…" : "Find A Activity"}</Text>
+                <Text style={styles.primaryText}>{isThinking ? t.thinking : t.findActivity}</Text>
               </Pressable>
-              <Text style={styles.smallNote}>The AI uses all six answers to choose one activity.</Text>
+              <Text style={styles.smallNote}>{t.useAnswers}</Text>
             </View>
           )}
 
           {screen === "result" && (
             <View style={styles.card}>
-              <BackButton onPress={() => setScreen("time")} />
-              <Text style={styles.eyebrow}>YOUR SUNVENTURE IDEA</Text>
-              <Text style={styles.title}>Try this:</Text>
+              <BackButton onPress={() => setScreen("time")} label={t.back} />
+              <Text style={styles.eyebrow}>{t.resultEyebrow}</Text>
+              <Text style={styles.title}>{t.resultTitle}</Text>
               <View style={styles.resultBox}><Text style={styles.resultText}>{activity}</Text></View>
-              <Text style={styles.safety}>✓ Your reminder is set for {timeText}.</Text>
-              <Text style={styles.smallNote}>Want a different idea? Go back and change an answer.</Text>
-              <Pressable style={styles.primaryButton} onPress={() => setScreen("language")}>
-                <Text style={styles.primaryText}>Try another idea</Text>
+              <Text style={styles.safety}>{t.reminderSet(timeText)}</Text>
+              <Text style={styles.smallNote}>{t.differentIdea}</Text>
+              <Pressable style={styles.primaryButton} onPress={() => setScreen("welcome")}>
+                <Text style={styles.primaryText}>{t.tryAnother}</Text>
               </Pressable>
             </View>
           )}
