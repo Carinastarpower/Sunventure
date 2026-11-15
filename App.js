@@ -17,7 +17,17 @@ import { StatusBar } from "expo-status-bar";
 
 const AI_HELPER_URL = "http://192.168.1.163:8787";
 const STORAGE_KEY = "sunventure-v1-answers";
-const AI_QUESTION_COUNT = 5;
+const AI_QUESTION_COUNT = 8;
+const QUESTION_CATEGORIES = [
+  "Interests",
+  "Personality",
+  "Social Preferences",
+  "Activity Preferences",
+  "Energy Levels",
+  "Learning Preferences",
+  "Time Preferences",
+  "Activity Goals",
+];
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -38,14 +48,14 @@ const translations = {
     tagline: "A simple idea for a brighter day.",
     welcomeEyebrow: "WELCOME",
     welcomeTitle: "Find something good to do.",
-    welcomeBody: "Choose a language, answer five simple AI questions, and Sunventure will suggest one activity.",
+    welcomeBody: "Choose a language, answer eight simple AI questions about what you like, and Sunventure will suggest eight activities.",
     safety: "✓ We will not ask for personal information.",
     continue: "Continue",
     languageEyebrow: "LANGUAGE",
     languageQuestion: "What language do you prefer?",
     languageBody: "Choose one language for your questions and activity idea.",
     back: "‹ Back",
-    questionEyebrow: (number) => `QUESTION ${number} OF 5 · YOUR IDEAS`,
+    questionEyebrow: (number) => `QUESTION ${number} OF 8 · YOUR IDEAS`,
     thinking: "Thinking of a question…",
     inputPlaceholder: "Type your answer",
     next: "Next",
@@ -55,11 +65,14 @@ const translations = {
     reminderBody: "Sunventure can remind you at this time.",
     changeTime: "Change time",
     findActivity: "Find A Activity",
-    useAnswers: "The AI uses all six answers to choose one activity.",
-    resultEyebrow: "YOUR SUNVENTURE IDEA",
-    resultTitle: "Try this:",
+    useAnswers: "The AI uses your answers to find eight activities.",
+    resultEyebrow: "YOUR SUNVENTURE IDEAS",
+    resultTitle: "Choose one activity:",
     reminderSet: (time) => `✓ Your reminder is set for ${time}.`,
-    differentIdea: "Want a different idea? Go back and change an answer.",
+    chooseActivity: "Choose an activity before setting a reminder.",
+    setReminder: "Set reminder",
+    selectedActivity: (activity) => `You chose: ${activity}`,
+    differentIdea: "Want different ideas? Go back and change an answer.",
     tryAnother: "Try another idea",
     questionErrorTitle: "Sunventure could not ask the next question",
     answerErrorTitle: "Sunventure could not answer",
@@ -73,14 +86,14 @@ const translations = {
     tagline: "让每一天更明亮的简单点子。",
     welcomeEyebrow: "欢迎",
     welcomeTitle: "找点有趣的事做吧。",
-    welcomeBody: "选择语言，回答五个简单的 AI 问题，Sunventure 会为你推荐一项活动。",
+    welcomeBody: "选择语言，回答八个关于你喜好的简单 AI 问题，Sunventure 会为你推荐八项活动。",
     safety: "✓ 我们不会询问个人信息。",
     continue: "继续",
     languageEyebrow: "语言",
     languageQuestion: "你喜欢使用哪种语言？",
     languageBody: "为你的问题和活动建议选择一种语言。",
     back: "‹ 返回",
-    questionEyebrow: (number) => `第 ${number} 个问题，共 5 个 · 你的想法`,
+    questionEyebrow: (number) => `第 ${number} 个问题，共 8 个 · 你的想法`,
     thinking: "正在想一个问题……",
     inputPlaceholder: "输入你的回答",
     next: "下一步",
@@ -90,11 +103,14 @@ const translations = {
     reminderBody: "Sunventure 可以在这个时间提醒你。",
     changeTime: "更改时间",
     findActivity: "寻找一个活动",
-    useAnswers: "AI 会使用你的六个回答来选择一项活动。",
+    useAnswers: "AI 会使用你的回答来找到八项活动。",
     resultEyebrow: "你的 SUNVENTURE 点子",
-    resultTitle: "试试这个：",
+    resultTitle: "选择一项活动：",
     reminderSet: (time) => `✓ 已为你设置 ${time} 的提醒。`,
-    differentIdea: "想换一个点子？返回并修改答案。",
+    chooseActivity: "请选择一项活动，然后设置提醒。",
+    setReminder: "设置提醒",
+    selectedActivity: (activity) => `你选择了：${activity}`,
+    differentIdea: "想换一些点子？返回并修改答案。",
     tryAnother: "再试一个点子",
     questionErrorTitle: "Sunventure 无法提出下一个问题",
     answerErrorTitle: "Sunventure 无法回答",
@@ -108,14 +124,14 @@ const translations = {
     tagline: "Una idea sencilla para un día más alegre.",
     welcomeEyebrow: "BIENVENIDO",
     welcomeTitle: "Encuentra algo bueno que hacer.",
-    welcomeBody: "Elige un idioma, responde cinco preguntas sencillas de IA y Sunventure sugerirá una actividad.",
+    welcomeBody: "Elige un idioma, responde ocho preguntas sencillas de IA sobre tus gustos y Sunventure sugerirá ocho actividades.",
     safety: "✓ No pediremos información personal.",
     continue: "Continuar",
     languageEyebrow: "IDIOMA",
     languageQuestion: "¿Qué idioma prefieres?",
     languageBody: "Elige un idioma para tus preguntas y tu idea de actividad.",
     back: "‹ Atrás",
-    questionEyebrow: (number) => `PREGUNTA ${number} DE 5 · TUS IDEAS`,
+    questionEyebrow: (number) => `PREGUNTA ${number} DE 8 · TUS IDEAS`,
     thinking: "Pensando en una pregunta…",
     inputPlaceholder: "Escribe tu respuesta",
     next: "Siguiente",
@@ -125,11 +141,14 @@ const translations = {
     reminderBody: "Sunventure puede recordártelo a esta hora.",
     changeTime: "Cambiar hora",
     findActivity: "Buscar una actividad",
-    useAnswers: "La IA usará tus seis respuestas para elegir una actividad.",
-    resultEyebrow: "TU IDEA SUNVENTURE",
-    resultTitle: "Prueba esto:",
+    useAnswers: "La IA usará tus respuestas para encontrar ocho actividades.",
+    resultEyebrow: "TUS IDEAS SUNVENTURE",
+    resultTitle: "Elige una actividad:",
     reminderSet: (time) => `✓ Tu recordatorio está programado para las ${time}.`,
-    differentIdea: "¿Quieres otra idea? Regresa y cambia una respuesta.",
+    chooseActivity: "Elige una actividad antes de programar un recordatorio.",
+    setReminder: "Programar recordatorio",
+    selectedActivity: (activity) => `Elegiste: ${activity}`,
+    differentIdea: "¿Quieres otras ideas? Regresa y cambia una respuesta.",
     tryAnother: "Probar otra idea",
     questionErrorTitle: "Sunventure no pudo hacer la siguiente pregunta",
     answerErrorTitle: "Sunventure no pudo responder",
@@ -142,7 +161,7 @@ const translations = {
 };
 
 async function requestAI(body) {
-  const endpoint = Platform.OS === "web" ? "/api/ask" : `${AI_HELPER_URL}/ask`;
+  const endpoint = Platform.OS === "web" && process.env.NODE_ENV !== "development" ? "/api/ask" : `${AI_HELPER_URL}/ask`;
   const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -179,10 +198,13 @@ export default function App() {
   const [answers, setAnswers] = useState({ language: "", time: new Date() });
   const [questionAnswers, setQuestionAnswers] = useState([]);
   const [question, setQuestion] = useState("");
+  const [questionOptions, setQuestionOptions] = useState([]);
   const [questionNumber, setQuestionNumber] = useState(0);
   const [answer, setAnswer] = useState("");
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [activity, setActivity] = useState("");
+  const [activities, setActivities] = useState([]);
+  const [selectedActivity, setSelectedActivity] = useState("");
+  const [reminderSet, setReminderSet] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
 
   useEffect(() => {
@@ -210,11 +232,19 @@ export default function App() {
     setIsThinking(true);
     setScreen("aiQuestion");
     setQuestion("");
+    setQuestionOptions([]);
     setAnswer("");
     try {
-      const data = await requestAI({ mode: "question", language, previousAnswers, askedQuestions });
+      const data = await requestAI({
+        mode: "question",
+        language,
+        category: QUESTION_CATEGORIES[nextNumber - 1],
+        previousAnswers,
+        askedQuestions,
+      });
       if (!data.question) throw new Error("No question returned");
       setQuestion(data.question);
+      setQuestionOptions(Array.isArray(data.options) ? data.options : []);
       setQuestionNumber(nextNumber);
     } catch {
       Alert.alert(
@@ -233,6 +263,7 @@ export default function App() {
     setAnswers((current) => ({ ...current, language }));
     setQuestionAnswers([]);
     setQuestion("");
+    setQuestionOptions([]);
     setQuestionNumber(0);
     setAnswer("");
     setScreen("welcome");
@@ -255,6 +286,7 @@ export default function App() {
 
     await loadNextQuestion({
       language: answers.language,
+      category: QUESTION_CATEGORIES[questionNumber],
       previousAnswers: nextAnswers,
       askedQuestions: [...questionAnswers.map((item) => item.question), question],
       nextNumber: questionNumber + 1,
@@ -278,16 +310,13 @@ export default function App() {
 
   async function findActivity() {
     setIsThinking(true);
-    setActivity("");
+    setActivities([]);
+    setSelectedActivity("");
+    setReminderSet(false);
     try {
       const data = await requestAI({ mode: "activity", language: answers.language, answers: questionAnswers });
-      if (!data.activity) throw new Error("No activity returned");
-      setActivity(data.activity);
-      try {
-        await scheduleReminder(data.activity.split(".")[0]);
-      } catch {
-        // The activity still works if phone notifications are turned off.
-      }
+      if (!Array.isArray(data.activities) || data.activities.length < 8) throw new Error("Not enough activities returned");
+      setActivities(data.activities.slice(0, 8));
       setScreen("result");
     } catch {
       Alert.alert(
@@ -298,6 +327,16 @@ export default function App() {
       );
     } finally {
       setIsThinking(false);
+    }
+  }
+
+  async function confirmActivity() {
+    if (!selectedActivity || reminderSet) return;
+    try {
+      await scheduleReminder(selectedActivity.split(".")[0]);
+      setReminderSet(true);
+    } catch {
+      // The activity still works if phone notifications are turned off.
     }
   }
 
@@ -329,10 +368,10 @@ export default function App() {
             <View style={styles.card}>
               <Text style={styles.eyebrow}>{t.languageEyebrow}</Text>
               <Text style={styles.title}>
-                {answers.language ? t.languageQuestion : "What language do you prefer? / 你喜欢使用哪种语言？ / ¿Qué idioma prefieres?"}
+                {answers.language ? t.languageQuestion : <>What language do you prefer?{"\n"}你喜欢使用哪种语言？{"\n"}¿Qué idioma prefieres?</>}
               </Text>
               <Text style={styles.body}>
-                {answers.language ? t.languageBody : "Choose one language / 请选择一种语言 / Elige un idioma"}
+                {answers.language ? t.languageBody : <>Choose one language{"\n"}请选择一种语言{"\n"}Elige un idioma</>}
               </Text>
               <View style={styles.choices}>
                 {languageOptions.map((item) => (
@@ -351,15 +390,23 @@ export default function App() {
               ) : (
                 <>
                   <Text style={styles.title}>{question}</Text>
-                  <TextInput
-                    accessibilityLabel="Your answer"
-                    value={answer}
-                    onChangeText={setAnswer}
-                    placeholder={t.inputPlaceholder}
-                    placeholderTextColor="#998F80"
-                    multiline
-                    style={styles.answerInput}
-                  />
+                  {questionOptions.length > 0 ? (
+                    <View style={styles.choices}>
+                      {questionOptions.map((option) => (
+                        <Choice key={option} label={option} selected={answer === option} onPress={() => setAnswer(option)} />
+                      ))}
+                    </View>
+                  ) : (
+                    <TextInput
+                      accessibilityLabel="Your answer"
+                      value={answer}
+                      onChangeText={setAnswer}
+                      placeholder={t.inputPlaceholder}
+                      placeholderTextColor="#998F80"
+                      multiline
+                      style={styles.answerInput}
+                    />
+                  )}
                   <Pressable disabled={!answer.trim()} style={[styles.primaryButton, !answer.trim() && styles.disabled]} onPress={submitAnswer}>
                     <Text style={styles.primaryText}>{t.next}</Text>
                   </Pressable>
@@ -395,8 +442,16 @@ export default function App() {
               <BackButton onPress={() => setScreen("time")} label={t.back} />
               <Text style={styles.eyebrow}>{t.resultEyebrow}</Text>
               <Text style={styles.title}>{t.resultTitle}</Text>
-              <View style={styles.resultBox}><Text style={styles.resultText}>{activity}</Text></View>
-              <Text style={styles.safety}>{t.reminderSet(timeText)}</Text>
+              <View style={styles.activityChoices}>
+                {activities.map((item, index) => (
+                  <Choice key={`${index}-${item}`} label={`${index + 1}. ${item}`} selected={selectedActivity === item} onPress={() => setSelectedActivity(item)} />
+                ))}
+              </View>
+              {selectedActivity && <Text style={styles.safety}>{t.selectedActivity(selectedActivity)}</Text>}
+              <Pressable disabled={!selectedActivity || reminderSet} style={[styles.primaryButton, (!selectedActivity || reminderSet) && styles.disabled]} onPress={confirmActivity}>
+                <Text style={styles.primaryText}>{t.setReminder}</Text>
+              </Pressable>
+              <Text style={styles.smallNote}>{reminderSet ? t.reminderSet(timeText) : t.chooseActivity}</Text>
               <Text style={styles.smallNote}>{t.differentIdea}</Text>
               <Pressable style={styles.primaryButton} onPress={() => setScreen("welcome")}>
                 <Text style={styles.primaryText}>{t.tryAnother}</Text>

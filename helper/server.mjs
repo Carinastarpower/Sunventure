@@ -38,16 +38,20 @@ const server = http.createServer(async (request, response) => {
         return;
       }
       const question = await askSunventureQuestion(answers);
-      sendJson(response, 200, { question });
+      sendJson(response, 200, question);
       return;
     }
 
-    if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 5) {
+    if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 8) {
       sendJson(response, 400, { error: "Please answer each question." });
       return;
     }
-    const activity = await askSunventureAI(answers);
-    sendJson(response, 200, { activity });
+    const activities = await askSunventureAI(answers);
+    if (activities.length < 8) {
+      sendJson(response, 500, { error: "The activity helper could not find enough ideas." });
+      return;
+    }
+    sendJson(response, 200, { activities });
   } catch (error) {
     console.error("Sunventure helper request failed:", error.message);
     sendJson(response, 500, { error: "The activity helper could not answer." });

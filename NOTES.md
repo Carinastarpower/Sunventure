@@ -14,7 +14,7 @@ The phone and computer must be on the same Wi-Fi. The helper uses the computer a
 ## Try the MVP in 2 steps
 
 1. In two terminals, run `npm run helper` and `npx expo start --lan`, then open the app in Expo Go.
-2. Tap `Get started`, choose the interest, company, language, place, and time, then tap `Find A Activity` to receive one short AI activity.
+2. Choose a language, tap `Continue`, answer the eight preference questions, choose one of the eight activities, and set the reminder.
 
 Expo Go SDK: 58
 OpenAI model: `gpt-5.6-luna`
@@ -32,12 +32,12 @@ To publish it with Vercel:
 3. Add one Vercel environment variable named `OPENAI_API_KEY` with the OpenAI key. Add it for the environments you deploy (Preview and/or Production).
 4. Deploy. No other Vercel setting is required for this app.
 
-To test the production-shaped web bundle locally, run `npx expo export -p web` and then `npx expo serve`. For normal development, run `npx expo start --web`.
+To test the production-shaped web bundle locally, run `npx expo export -p web` and then `npx expo serve`. For normal web development, run `npm run helper` in one terminal and `npx expo start --web` in another; the development web app uses that local helper, while the deployed web app uses the Vercel function.
 
 ## Done
 
 - Created the SDK 58 Expo app.
-- Added a language page as the first screen. After choosing English, Chinese, or Spanish, the original welcome page and the rest of the app use that language. The flow then asks five different AI-generated questions one at a time, followed by reminder time and the `Find A Activity` button.
+- Added a language page as the first screen. After choosing English, Chinese, or Spanish, the original welcome page and the rest of the app use that language. The flow then asks eight different AI-generated preference questions one at a time, followed by eight activity choices and a reminder.
 - Added local phone storage and a back button on each step.
 - Added the computer-only Node helper. It reads `.env`, sends the full `BRIEF.md` instructions to OpenAI, and never puts the key in the app.
 - Added Expo web support, the centered phone frame, the Vercel AI function, and Vercel's single-page-app rewrite configuration.

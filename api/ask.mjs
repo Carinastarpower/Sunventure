@@ -11,6 +11,11 @@ function normalizedQuestion(question) {
   return question.toLowerCase().replace(/[^a-z0-9\u00c0-\u024f\u4e00-\u9fff]+/g, " ").trim();
 }
 
+function parseJson(text) {
+  const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+  return JSON.parse(cleaned);
+}
+
 export default async function handler(request, response) {
   if (request.method === "OPTIONS") {
     response.status(204).setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -38,34 +43,56 @@ export default async function handler(request, response) {
         sendJson(response, 400, { error: "The question request is incomplete." });
         return;
       }
-      const questionInstructions = `${brief}\n\nAsk exactly one new, simple question in ${answers.language} to help choose a safe activity for an older adult. This is question ${answers.askedQuestions.length + 1} of 5. Use the answers already given to decide what would be useful to ask next. Never repeat or closely rephrase a previous question. Do not ask for a name, address, health information, or other personal information. Reply with only the question, with no number, preface, or extra text.\n\nPrevious questions:\n${answers.askedQuestions.join("\n") || "None"}\n\nPrevious answers:\n${answers.previousAnswers.map(({ question, answer }) => `${question} — ${answer}`).join("\n") || "None"}`;
+      const questionInstructions = `${brief}\n\nCreate one new question in ${answers.language} about the category "${answers.category}" to help choose safe activities for an older adult. This is question ${answers.askedQuestions.length + 1} of 8. Start broad, then use the previous answers to make later questions more specific. Never repeat or closely rephrase a previous question. Do not ask for a name, address, health information, or other personal information. Return only valid JSON in this exact shape: {"question":"one simple question","options":["six short answer choices"]}. The six choices must be in ${answers.language}.\n\nPrevious questions:\n${answers.askedQuestions.join("\n") || "None"}\n\nPrevious answers:\n${answers.previousAnswers.map(({ question, answer }) => `${question} — ${answer}`).join("\n") || "None"}`;
       let questionResponse = await client.responses.create({
         model: "gpt-5.6-luna",
         instructions: questionInstructions,
         input: "Create the next question now.",
       });
-      if (answers.askedQuestions.some((previous) => normalizedQuestion(previous) === normalizedQuestion(questionResponse.output_text))) {
+      let questionData;
+      try {
+        questionData = parseJson(questionResponse.output_text);
+      } catch {
+        questionData = { question: questionResponse.output_text, options: [] };
+      }
+      if (answers.askedQuestions.some((previous) => normalizedQuestion(previous) === normalizedQuestion(questionData.question))) {
         questionResponse = await client.responses.create({
           model: "gpt-5.6-luna",
           instructions: `${questionInstructions}\nYour last draft was a repeat. Write a completely different question now.`,
           input: "Create a different next question now.",
         });
+        try {
+          questionData = parseJson(questionResponse.output_text);
+        } catch {
+          questionData = { question: questionResponse.output_text, options: [] };
+        }
       }
-      sendJson(response, 200, { question: questionResponse.output_text.trim() });
+      sendJson(response, 200, { question: questionData.question, options: Array.isArray(questionData.options) ? questionData.options : [] });
       return;
     }
 
-    if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 5) {
+    if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 8) {
       sendJson(response, 400, { error: "Please answer each question." });
       return;
     }
     const completion = await client.responses.create({
       model: "gpt-5.6-luna",
-      instructions: `${brief}\n\nSuggest one safe, simple activity using all of the user's answers below. Do not ask a question. Reply in ${answers.language}. Keep it to a short title and 1-2 short sentences. Do not include personal information or invent facts.\n\nUser answers:\n${answers.answers.map(({ question, answer }) => `${question} — ${answer}`).join("\n")}`,
-      input: "Suggest the best activity now.",
+      instructions: `${brief}\n\nSuggest at least eight safe, simple activities using all of the user's answers below. Do not ask a question. Reply in ${answers.language}. Keep each activity to a short title and one short sentence. Do not include personal information or invent facts. Return only valid JSON in this exact shape: {"activities":["eight short activities"]}.\n\nUser answers:\n${answers.answers.map(({ question, answer }) => `${question} — ${answer}`).join("\n")}`,
+      input: "Suggest eight activities now.",
     });
 
-    sendJson(response, 200, { activity: completion.output_text.trim() });
+    let activities = [];
+    try {
+      const parsed = parseJson(completion.output_text);
+      activities = Array.isArray(parsed.activities) ? parsed.activities : [];
+    } catch {
+      activities = completion.output_text.split(/\n+/).map((item) => item.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean).slice(0, 8);
+    }
+    if (activities.length < 8) {
+      sendJson(response, 500, { error: "The activity helper could not find enough ideas." });
+      return;
+    }
+    sendJson(response, 200, { activities });
   } catch (error) {
     console.error("Sunventure Vercel function failed:", error.message);
     sendJson(response, 500, { error: "The activity helper could not answer." });
