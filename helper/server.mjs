@@ -1,5 +1,5 @@
 import http from "node:http";
-import { askSunventureAI } from "./askAI.mjs";
+import { askSunventureAI, askSunventureQuestion } from "./askAI.mjs";
 
 const port = Number(process.env.PORT || 8787);
 
@@ -32,8 +32,17 @@ const server = http.createServer(async (request, response) => {
     let rawBody = "";
     for await (const chunk of request) rawBody += chunk;
     const answers = JSON.parse(rawBody);
-    const required = ["interest", "company", "setting", "language"];
-    if (required.some((key) => typeof answers[key] !== "string" || !answers[key].trim())) {
+    if (answers.mode === "question") {
+      if (typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.previousAnswers) || !Array.isArray(answers.askedQuestions)) {
+        sendJson(response, 400, { error: "The question request is incomplete." });
+        return;
+      }
+      const question = await askSunventureQuestion(answers);
+      sendJson(response, 200, { question });
+      return;
+    }
+
+    if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 5) {
       sendJson(response, 400, { error: "Please answer each question." });
       return;
     }
