@@ -18,6 +18,7 @@ import { StatusBar } from "expo-status-bar";
 const AI_HELPER_URL = "http://192.168.1.163:8787";
 const STORAGE_KEY = "sunventure-v1-answers";
 const AI_QUESTION_COUNT = 7;
+const MULTI_SELECT_QUESTION_NUMBERS = [1, 5, 7];
 
 const questionSets = {
   English: [
@@ -80,6 +81,7 @@ const translations = {
     inputPlaceholder: "Type your answer",
     next: "Next",
     oneQuestion: "One simple question at a time.",
+    selectAll: "You can choose more than one.",
     reminderEyebrow: "REMINDER",
     reminderTitle: "When would you like to do it?",
     reminderBody: "Sunventure can remind you at this time.",
@@ -118,6 +120,7 @@ const translations = {
     inputPlaceholder: "输入你的回答",
     next: "下一步",
     oneQuestion: "一次回答一个简单问题。",
+    selectAll: "你可以选择多个答案。",
     reminderEyebrow: "提醒",
     reminderTitle: "你想什么时候做这件事？",
     reminderBody: "Sunventure 可以在这个时间提醒你。",
@@ -156,6 +159,7 @@ const translations = {
     inputPlaceholder: "Escribe tu respuesta",
     next: "Siguiente",
     oneQuestion: "Una pregunta sencilla a la vez.",
+    selectAll: "Puedes elegir más de una opción.",
     reminderEyebrow: "RECORDATORIO",
     reminderTitle: "¿Cuándo te gustaría hacerlo?",
     reminderBody: "Sunventure puede recordártelo a esta hora.",
@@ -271,8 +275,19 @@ export default function App() {
     loadNextQuestion({ language: answers.language, nextNumber: 1 });
   }
 
+  function chooseQuestionOption(option) {
+    if (MULTI_SELECT_QUESTION_NUMBERS.includes(questionNumber)) {
+      setAnswer((current) => {
+        const selected = Array.isArray(current) ? current : [];
+        return selected.includes(option) ? selected.filter((item) => item !== option) : [...selected, option];
+      });
+      return;
+    }
+    setAnswer(option);
+  }
+
   async function submitAnswer() {
-    const cleanAnswer = answer.trim();
+    const cleanAnswer = Array.isArray(answer) ? answer.join(", ") : answer.trim();
     if (!cleanAnswer || isThinking) return;
 
     const nextAnswers = [...questionAnswers, { question, answer: cleanAnswer }];
@@ -333,6 +348,8 @@ export default function App() {
   }
 
   const t = translations[answers.language] || translations.English;
+  const isMultiSelectQuestion = MULTI_SELECT_QUESTION_NUMBERS.includes(questionNumber);
+  const hasAnswer = Array.isArray(answer) ? answer.length > 0 : Boolean(answer.trim());
   const timeText = answers.time.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
   return (
@@ -385,13 +402,13 @@ export default function App() {
                   {questionOptions.length > 0 ? (
                     <View style={styles.choices}>
                       {questionOptions.map((option) => (
-                        <Choice key={option} label={option} selected={answer === option} onPress={() => setAnswer(option)} />
+                        <Choice key={option} label={option} selected={Array.isArray(answer) ? answer.includes(option) : answer === option} onPress={() => chooseQuestionOption(option)} />
                       ))}
                     </View>
                   ) : (
                     <TextInput
                       accessibilityLabel="Your answer"
-                      value={answer}
+                      value={Array.isArray(answer) ? answer.join(", ") : answer}
                       onChangeText={setAnswer}
                       placeholder={t.inputPlaceholder}
                       placeholderTextColor="#998F80"
@@ -399,11 +416,12 @@ export default function App() {
                       style={styles.answerInput}
                     />
                   )}
-                  <Pressable disabled={!answer.trim()} style={[styles.primaryButton, !answer.trim() && styles.disabled]} onPress={submitAnswer}>
+                  <Pressable disabled={!hasAnswer} style={[styles.primaryButton, !hasAnswer && styles.disabled]} onPress={submitAnswer}>
                     <Text style={styles.primaryText}>{t.next}</Text>
                   </Pressable>
                 </>
               )}
+              {isMultiSelectQuestion && <Text style={styles.smallNote}>{t.selectAll}</Text>}
               <Text style={styles.smallNote}>{t.oneQuestion}</Text>
             </View>
           )}
