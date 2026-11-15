@@ -42,7 +42,7 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
-    if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 8) {
+    if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 7) {
       sendJson(response, 400, { error: "Please answer each question." });
       return;
     }

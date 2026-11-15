@@ -17,17 +17,37 @@ import { StatusBar } from "expo-status-bar";
 
 const AI_HELPER_URL = "http://192.168.1.163:8787";
 const STORAGE_KEY = "sunventure-v1-answers";
-const AI_QUESTION_COUNT = 8;
-const QUESTION_CATEGORIES = [
-  "Interests",
-  "Personality",
-  "Social Preferences",
-  "Activity Preferences",
-  "Energy Levels",
-  "Learning Preferences",
-  "Time Preferences",
-  "Activity Goals",
-];
+const AI_QUESTION_COUNT = 7;
+
+const questionSets = {
+  English: [
+    { question: "Which words describe your personality?", options: ["Introverted", "Extroverted", "Curious", "Creative", "Calm", "Energetic"] },
+    { question: "How would you like to spend time with others?", options: ["Alone", "With family", "With friends", "In small groups", "In large groups", "No preference"] },
+    { question: "What kind of activity setting do you prefer?", options: ["Indoor", "Outdoor", "At home", "In the community", "Online", "No preference"] },
+    { question: "How much energy would you like to use?", options: ["Low energy", "Moderate energy", "High energy", "Depends on the day"] },
+    { question: "How do you like to learn?", options: ["Reading", "Watching", "Listening", "Hands-on activities", "Learning with others", "No preference"] },
+    { question: "What time do you prefer?", options: ["Morning", "Afternoon", "Evening", "Anytime"] },
+    { question: "What is your goal for the activity?", options: ["Have fun", "Learn something", "Meet people", "Stay active", "Relax", "Feel productive"] },
+  ],
+  Chinese: [
+    { question: "哪些词语最能描述你的性格？", options: ["内向", "外向", "好奇", "有创造力", "平静", "精力充沛"] },
+    { question: "你想怎样和别人一起度过时间？", options: ["独自一人", "和家人一起", "和朋友一起", "小组活动", "大组活动", "没有偏好"] },
+    { question: "你喜欢什么样的活动环境？", options: ["室内", "户外", "在家", "在社区里", "在线", "没有偏好"] },
+    { question: "你想使用多少精力？", options: ["低强度", "中等强度", "高强度", "取决于当天"] },
+    { question: "你喜欢怎样学习？", options: ["阅读", "观看", "听讲", "动手实践", "和别人一起学习", "没有偏好"] },
+    { question: "你喜欢什么时间？", options: ["早上", "下午", "晚上", "任何时间"] },
+    { question: "你希望从活动中得到什么？", options: ["享受乐趣", "学习新东西", "认识朋友", "保持活跃", "放松", "感到有成就"] },
+  ],
+  Spanish: [
+    { question: "¿Qué palabras describen tu personalidad?", options: ["Introvertido", "Extrovertido", "Curioso", "Creativo", "Tranquilo", "Enérgico"] },
+    { question: "¿Cómo te gustaría pasar tiempo con otras personas?", options: ["Solo", "Con familia", "Con amigos", "En grupos pequeños", "En grupos grandes", "Sin preferencia"] },
+    { question: "¿Qué lugar prefieres para una actividad?", options: ["En interiores", "Al aire libre", "En casa", "En la comunidad", "En línea", "Sin preferencia"] },
+    { question: "¿Cuánta energía te gustaría usar?", options: ["Poca energía", "Energía moderada", "Mucha energía", "Depende del día"] },
+    { question: "¿Cómo te gusta aprender?", options: ["Leyendo", "Mirando", "Escuchando", "Con actividades prácticas", "Aprendiendo con otros", "Sin preferencia"] },
+    { question: "¿Qué horario prefieres?", options: ["Por la mañana", "Por la tarde", "Por la noche", "Cualquier hora"] },
+    { question: "¿Cuál es tu meta para la actividad?", options: ["Divertirte", "Aprender algo", "Conocer gente", "Mantenerte activo", "Relajarte", "Sentirte productivo"] },
+  ],
+};
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -48,14 +68,14 @@ const translations = {
     tagline: "A simple idea for a brighter day.",
     welcomeEyebrow: "WELCOME",
     welcomeTitle: "Find something good to do.",
-    welcomeBody: "Choose a language, answer eight simple AI questions about what you like, and Sunventure will suggest eight activities.",
+    welcomeBody: "Choose a language, answer seven simple questions about what you like, and Sunventure will suggest eight activities.",
     safety: "✓ We will not ask for personal information.",
     continue: "Continue",
     languageEyebrow: "LANGUAGE",
     languageQuestion: "What language do you prefer?",
     languageBody: "Choose one language for your questions and activity idea.",
     back: "‹ Back",
-    questionEyebrow: (number) => `QUESTION ${number} OF 8 · YOUR IDEAS`,
+    questionEyebrow: (number) => `QUESTION ${number} OF 7 · YOUR IDEAS`,
     thinking: "Thinking of a question…",
     inputPlaceholder: "Type your answer",
     next: "Next",
@@ -86,14 +106,14 @@ const translations = {
     tagline: "让每一天更明亮的简单点子。",
     welcomeEyebrow: "欢迎",
     welcomeTitle: "找点有趣的事做吧。",
-    welcomeBody: "选择语言，回答八个关于你喜好的简单 AI 问题，Sunventure 会为你推荐八项活动。",
+    welcomeBody: "选择语言，回答七个关于你喜好的简单问题，Sunventure 会为你推荐八项活动。",
     safety: "✓ 我们不会询问个人信息。",
     continue: "继续",
     languageEyebrow: "语言",
     languageQuestion: "你喜欢使用哪种语言？",
     languageBody: "为你的问题和活动建议选择一种语言。",
     back: "‹ 返回",
-    questionEyebrow: (number) => `第 ${number} 个问题，共 8 个 · 你的想法`,
+    questionEyebrow: (number) => `第 ${number} 个问题，共 7 个 · 你的想法`,
     thinking: "正在想一个问题……",
     inputPlaceholder: "输入你的回答",
     next: "下一步",
@@ -124,14 +144,14 @@ const translations = {
     tagline: "Una idea sencilla para un día más alegre.",
     welcomeEyebrow: "BIENVENIDO",
     welcomeTitle: "Encuentra algo bueno que hacer.",
-    welcomeBody: "Elige un idioma, responde ocho preguntas sencillas de IA sobre tus gustos y Sunventure sugerirá ocho actividades.",
+    welcomeBody: "Elige un idioma, responde siete preguntas sencillas sobre tus gustos y Sunventure sugerirá ocho actividades.",
     safety: "✓ No pediremos información personal.",
     continue: "Continuar",
     languageEyebrow: "IDIOMA",
     languageQuestion: "¿Qué idioma prefieres?",
     languageBody: "Elige un idioma para tus preguntas y tu idea de actividad.",
     back: "‹ Atrás",
-    questionEyebrow: (number) => `PREGUNTA ${number} DE 8 · TUS IDEAS`,
+    questionEyebrow: (number) => `PREGUNTA ${number} DE 7 · TUS IDEAS`,
     thinking: "Pensando en una pregunta…",
     inputPlaceholder: "Escribe tu respuesta",
     next: "Siguiente",
@@ -228,35 +248,13 @@ export default function App() {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...answers, questionAnswers }));
   }, [answers, questionAnswers]);
 
-  async function loadNextQuestion({ language, previousAnswers, askedQuestions, nextNumber }) {
-    setIsThinking(true);
+  function loadNextQuestion({ language, nextNumber }) {
+    const nextQuestion = questionSets[language][nextNumber - 1];
     setScreen("aiQuestion");
-    setQuestion("");
-    setQuestionOptions([]);
+    setQuestion(nextQuestion.question);
+    setQuestionOptions(nextQuestion.options);
     setAnswer("");
-    try {
-      const data = await requestAI({
-        mode: "question",
-        language,
-        category: QUESTION_CATEGORIES[nextNumber - 1],
-        previousAnswers,
-        askedQuestions,
-      });
-      if (!data.question) throw new Error("No question returned");
-      setQuestion(data.question);
-      setQuestionOptions(Array.isArray(data.options) ? data.options : []);
-      setQuestionNumber(nextNumber);
-    } catch {
-      Alert.alert(
-        translations[language].questionErrorTitle,
-        Platform.OS === "web"
-          ? translations[language].webError
-          : translations[language].nativeQuestionError,
-      );
-      setScreen("welcome");
-    } finally {
-      setIsThinking(false);
-    }
+    setQuestionNumber(nextNumber);
   }
 
   function chooseLanguage(language) {
@@ -270,7 +268,7 @@ export default function App() {
   }
 
   function startQuestions() {
-    loadNextQuestion({ language: answers.language, previousAnswers: [], askedQuestions: [], nextNumber: 1 });
+    loadNextQuestion({ language: answers.language, nextNumber: 1 });
   }
 
   async function submitAnswer() {
@@ -284,13 +282,7 @@ export default function App() {
       return;
     }
 
-    await loadNextQuestion({
-      language: answers.language,
-      category: QUESTION_CATEGORIES[questionNumber],
-      previousAnswers: nextAnswers,
-      askedQuestions: [...questionAnswers.map((item) => item.question), question],
-      nextNumber: questionNumber + 1,
-    });
+    loadNextQuestion({ language: answers.language, nextNumber: questionNumber + 1 });
   }
 
   async function scheduleReminder(title) {
