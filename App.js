@@ -230,6 +230,7 @@ export default function App() {
   const [question, setQuestion] = useState("");
   const [questionOptions, setQuestionOptions] = useState([]);
   const [questionNumber, setQuestionNumber] = useState(0);
+  const [askedQuestions, setAskedQuestions] = useState([]);
   const [answer, setAnswer] = useState("");
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [activities, setActivities] = useState([]);
@@ -258,13 +259,34 @@ export default function App() {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...answers, questionAnswers }));
   }, [answers, questionAnswers]);
 
-  function loadNextQuestion({ language, nextNumber }) {
+  async function loadNextQuestion({ language, nextNumber, previousAnswers = questionAnswers, previousQuestions = askedQuestions }) {
     const questionTemplate = questionSets[language][nextNumber - 1];
     setScreen("aiQuestion");
-    setQuestion(questionTemplate.question);
-    setQuestionOptions(questionTemplate.options);
-    setAnswer(MULTI_SELECT_QUESTION_NUMBERS.includes(nextNumber) ? [] : "");
+    setQuestion("");
+    setQuestionOptions([]);
+    setAnswer("");
     setQuestionNumber(nextNumber);
+    setIsThinking(true);
+    try {
+      const data = await requestAI({
+        mode: "question",
+        language,
+        category: questionTemplate.category,
+        options: questionTemplate.options,
+        previousAnswers,
+        askedQuestions: previousQuestions,
+      });
+      const nextQuestion = typeof data.question === "string" && data.question.trim() ? data.question : questionTemplate.question;
+      const nextOptions = Array.isArray(data.options) && data.options.length > 0 ? data.options : questionTemplate.options;
+      setQuestion(nextQuestion);
+      setQuestionOptions(nextOptions);
+      setAskedQuestions([...previousQuestions, nextQuestion]);
+    } catch (error) {
+      Alert.alert(t.questionErrorTitle, error.message || (Platform.OS === "web" ? t.webError : t.nativeQuestionError));
+      setScreen("welcome");
+    } finally {
+      setIsThinking(false);
+    }
   }
 
   function chooseLanguage(language) {
@@ -273,12 +295,13 @@ export default function App() {
     setQuestion("");
     setQuestionOptions([]);
     setQuestionNumber(0);
+    setAskedQuestions([]);
     setAnswer("");
     setScreen("welcome");
   }
 
   function startQuestions() {
-    loadNextQuestion({ language: answers.language, nextNumber: 1 });
+    loadNextQuestion({ language: answers.language, nextNumber: 1, previousAnswers: [], previousQuestions: [] });
   }
 
   function chooseQuestionOption(option) {
@@ -303,7 +326,7 @@ export default function App() {
       return;
     }
 
-    loadNextQuestion({ language: answers.language, nextNumber: questionNumber + 1 });
+    loadNextQuestion({ language: answers.language, nextNumber: questionNumber + 1, previousAnswers: nextAnswers, previousQuestions: askedQuestions });
   }
 
   async function scheduleReminder(title) {
