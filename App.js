@@ -271,8 +271,8 @@ export default function App() {
       const data = await requestAI({
         mode: "question",
         language,
-        category: questionTemplate.category,
-        options: questionTemplate.options,
+        category: nextNumber === 1 ? questionTemplate.category : "the next best preference to narrow down the activity",
+        options: nextNumber === 1 ? questionTemplate.options : [],
         previousAnswers,
         askedQuestions: previousQuestions,
       });
