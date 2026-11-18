@@ -22,31 +22,31 @@ const MULTI_SELECT_QUESTION_NUMBERS = [1, 5, 7];
 
 const questionSets = {
   English: [
-    { category: "personality", question: "Which words describe your personality?", options: ["Introverted", "Extroverted", "Curious", "Creative", "Calm", "Energetic"] },
-    { category: "social preferences", question: "How would you like to spend time with others?", options: ["Alone", "With family", "With friends", "In small groups", "In large groups", "No preference"] },
-    { category: "activity preferences", question: "What kind of activity setting do you prefer?", options: ["Indoor", "Outdoor", "At home", "In the community", "Online", "No preference"] },
-    { category: "energy levels", question: "How much energy would you like to use?", options: ["Low energy", "Moderate energy", "High energy", "Depends on the day"] },
-    { category: "learning preferences", question: "How do you like to learn?", options: ["Reading", "Watching", "Listening", "Hands-on activities", "Learning with others", "No preference"] },
-    { category: "time preferences", question: "What time do you prefer?", options: ["Morning", "Afternoon", "Evening", "Anytime"] },
-    { category: "activity goals", question: "What is your goal for the activity?", options: ["Have fun", "Learn something", "Meet people", "Stay active", "Relax", "Feel productive"] },
+    { category: "personality", question: "Personality:", options: ["Introverted", "Extroverted", "Curious", "Creative", "Calm", "Energetic"] },
+    { category: "social preferences", question: "Social Preferences:", options: ["Alone", "With family", "With friends", "In small groups", "In large groups", "No preference"] },
+    { category: "activity preferences", question: "Activity Preferences:", options: ["Indoor", "Outdoor", "At home", "In the community", "Online", "No preference"] },
+    { category: "energy levels", question: "Energy Levels:", options: ["Low energy", "Moderate energy", "High energy", "Depends on the day"] },
+    { category: "learning preferences", question: "Learning Preferences:", options: ["Reading", "Watching", "Listening", "Hands-on activities", "Learning with others", "No preference"] },
+    { category: "time preferences", question: "Time Preferences:", options: ["Morning", "Afternoon", "Evening", "Anytime"] },
+    { category: "activity goals", question: "Activity Goals:", options: ["Have fun", "Learn something", "Meet people", "Stay active", "Relax", "Feel productive"] },
   ],
   Chinese: [
-    { category: "性格", question: "哪些词语最能描述你的性格？", options: ["内向", "外向", "好奇", "有创造力", "平静", "精力充沛"] },
-    { category: "社交偏好", question: "你想怎样和别人一起度过时间？", options: ["独自一人", "和家人一起", "和朋友一起", "小组活动", "大组活动", "没有偏好"] },
-    { category: "活动偏好", question: "你喜欢什么样的活动环境？", options: ["室内", "户外", "在家", "在社区里", "在线", "没有偏好"] },
-    { category: "精力水平", question: "你想使用多少精力？", options: ["低强度", "中等强度", "高强度", "取决于当天"] },
-    { category: "学习偏好", question: "你喜欢怎样学习？", options: ["阅读", "观看", "听讲", "动手实践", "和别人一起学习", "没有偏好"] },
-    { category: "时间偏好", question: "你喜欢什么时间？", options: ["早上", "下午", "晚上", "任何时间"] },
-    { category: "活动目标", question: "你希望从活动中得到什么？", options: ["享受乐趣", "学习新东西", "认识朋友", "保持活跃", "放松", "感到有成就"] },
+    { category: "性格", question: "性格：", options: ["内向", "外向", "好奇", "有创造力", "平静", "精力充沛"] },
+    { category: "社交偏好", question: "社交偏好：", options: ["独自一人", "和家人一起", "和朋友一起", "小组活动", "大组活动", "没有偏好"] },
+    { category: "活动偏好", question: "活动偏好：", options: ["室内", "户外", "在家", "在社区里", "在线", "没有偏好"] },
+    { category: "精力水平", question: "精力水平：", options: ["低强度", "中等强度", "高强度", "取决于当天"] },
+    { category: "学习偏好", question: "学习偏好：", options: ["阅读", "观看", "听讲", "动手实践", "和别人一起学习", "没有偏好"] },
+    { category: "时间偏好", question: "时间偏好：", options: ["早上", "下午", "晚上", "任何时间"] },
+    { category: "活动目标", question: "活动目标：", options: ["享受乐趣", "学习新东西", "认识朋友", "保持活跃", "放松", "感到有成就"] },
   ],
   Spanish: [
-    { category: "personalidad", question: "¿Qué palabras describen tu personalidad?", options: ["Introvertido", "Extrovertido", "Curioso", "Creativo", "Tranquilo", "Enérgico"] },
-    { category: "preferencias sociales", question: "¿Cómo te gustaría pasar tiempo con otras personas?", options: ["Solo", "Con familia", "Con amigos", "En grupos pequeños", "En grupos grandes", "Sin preferencia"] },
-    { category: "preferencias de actividad", question: "¿Qué lugar prefieres para una actividad?", options: ["En interiores", "Al aire libre", "En casa", "En la comunidad", "En línea", "Sin preferencia"] },
-    { category: "niveles de energía", question: "¿Cuánta energía te gustaría usar?", options: ["Poca energía", "Energía moderada", "Mucha energía", "Depende del día"] },
-    { category: "preferencias de aprendizaje", question: "¿Cómo te gusta aprender?", options: ["Leyendo", "Mirando", "Escuchando", "Con actividades prácticas", "Aprendiendo con otros", "Sin preferencia"] },
-    { category: "preferencias de horario", question: "¿Qué horario prefieres?", options: ["Por la mañana", "Por la tarde", "Por la noche", "Cualquier hora"] },
-    { category: "metas de actividad", question: "¿Cuál es tu meta para la actividad?", options: ["Divertirte", "Aprender algo", "Conocer gente", "Mantenerte activo", "Relajarte", "Sentirte productivo"] },
+    { category: "personalidad", question: "Personalidad:", options: ["Introvertido", "Extrovertido", "Curioso", "Creativo", "Tranquilo", "Enérgico"] },
+    { category: "preferencias sociales", question: "Preferencias Sociales:", options: ["Solo", "Con familia", "Con amigos", "En grupos pequeños", "En grupos grandes", "Sin preferencia"] },
+    { category: "preferencias de actividad", question: "Preferencias de Actividad:", options: ["En interiores", "Al aire libre", "En casa", "En la comunidad", "En línea", "Sin preferencia"] },
+    { category: "niveles de energía", question: "Niveles de Energía:", options: ["Poca energía", "Energía moderada", "Mucha energía", "Depende del día"] },
+    { category: "preferencias de aprendizaje", question: "Preferencias de Aprendizaje:", options: ["Leyendo", "Mirando", "Escuchando", "Con actividades prácticas", "Aprendiendo con otros", "Sin preferencia"] },
+    { category: "preferencias de horario", question: "Preferencias de Horario:", options: ["Por la mañana", "Por la tarde", "Por la noche", "Cualquier hora"] },
+    { category: "metas de actividad", question: "Metas de Actividad:", options: ["Divertirte", "Aprender algo", "Conocer gente", "Mantenerte activo", "Relajarte", "Sentirte productivo"] },
   ],
 };
 
@@ -230,7 +230,6 @@ export default function App() {
   const [question, setQuestion] = useState("");
   const [questionOptions, setQuestionOptions] = useState([]);
   const [questionNumber, setQuestionNumber] = useState(0);
-  const [askedQuestions, setAskedQuestions] = useState([]);
   const [answer, setAnswer] = useState("");
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [activities, setActivities] = useState([]);
@@ -259,32 +258,13 @@ export default function App() {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...answers, questionAnswers }));
   }, [answers, questionAnswers]);
 
-  async function loadNextQuestion({ language, nextNumber, previousAnswers = questionAnswers, previousQuestions = askedQuestions }) {
+  function loadNextQuestion({ language, nextNumber }) {
     const questionTemplate = questionSets[language][nextNumber - 1];
     setScreen("aiQuestion");
-    setQuestion("");
-    setQuestionOptions([]);
-    setAnswer("");
+    setQuestion(questionTemplate.question);
+    setQuestionOptions(questionTemplate.options);
+    setAnswer(MULTI_SELECT_QUESTION_NUMBERS.includes(nextNumber) ? [] : "");
     setQuestionNumber(nextNumber);
-    setIsThinking(true);
-    try {
-      const data = await requestAI({
-        mode: "question",
-        language,
-        category: questionTemplate.category,
-        options: questionTemplate.options,
-        previousAnswers,
-        askedQuestions: previousQuestions,
-      });
-      setQuestion(typeof data.question === "string" && data.question.trim() ? data.question : questionTemplate.question);
-      setQuestionOptions(Array.isArray(data.options) && data.options.length > 0 ? data.options : questionTemplate.options);
-      setAskedQuestions([...previousQuestions, data.question || questionTemplate.question]);
-    } catch (error) {
-      Alert.alert(t.questionErrorTitle, error.message || (Platform.OS === "web" ? t.webError : t.nativeQuestionError));
-      setScreen("welcome");
-    } finally {
-      setIsThinking(false);
-    }
   }
 
   function chooseLanguage(language) {
@@ -293,13 +273,12 @@ export default function App() {
     setQuestion("");
     setQuestionOptions([]);
     setQuestionNumber(0);
-    setAskedQuestions([]);
     setAnswer("");
     setScreen("welcome");
   }
 
   function startQuestions() {
-    loadNextQuestion({ language: answers.language, nextNumber: 1, previousAnswers: [], previousQuestions: [] });
+    loadNextQuestion({ language: answers.language, nextNumber: 1 });
   }
 
   function chooseQuestionOption(option) {
@@ -324,7 +303,7 @@ export default function App() {
       return;
     }
 
-    loadNextQuestion({ language: answers.language, nextNumber: questionNumber + 1, previousAnswers: nextAnswers, previousQuestions: askedQuestions });
+    loadNextQuestion({ language: answers.language, nextNumber: questionNumber + 1 });
   }
 
   async function scheduleReminder(title) {
