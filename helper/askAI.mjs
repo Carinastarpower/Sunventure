@@ -1,26 +1,31 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import OpenAI from "openai";
+import { getKey, invalidateKey, isInvalidOpenAIKeyError } from "./getKey.mjs";
 
 const projectRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 
-async function readLocalEnv() {
-  const envText = await fs.readFile(path.join(projectRoot, ".env"), "utf8");
-  const line = envText.split(/\r?\n/).find((item) => item.startsWith("OPENAI_API_KEY="));
-  const apiKey = line?.slice("OPENAI_API_KEY=".length).trim();
-  if (!apiKey) throw new Error("OPENAI_API_KEY is missing from .env");
-  return apiKey;
-}
-
 async function createResponse({ instructions, input }) {
   const brief = await fs.readFile(path.join(projectRoot, "BRIEF.md"), "utf8");
-  const client = new OpenAI({ apiKey: await readLocalEnv() });
-  const response = await client.responses.create({
-    model: "gpt-5.6-luna",
-    instructions: `${brief}\n\n${instructions}`,
-    input,
-  });
-  return response.output_text.trim();
+  const request = async (apiKey) => {
+    const client = new OpenAI({ apiKey });
+    const response = await client.responses.create({
+      model: "gpt-5.6-luna",
+      instructions: `${brief}\n\n${instructions}`,
+      input,
+    });
+    return response.output_text.trim();
+  };
+
+  let apiKey = await getKey();
+  try {
+    return await request(apiKey);
+  } catch (error) {
+    if (!isInvalidOpenAIKeyError(error)) throw error;
+    invalidateKey(apiKey);
+    apiKey = await getKey({ forceRefresh: true });
+    return request(apiKey);
+  }
 }
 
 function normalizedQuestion(question) {

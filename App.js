@@ -192,7 +192,13 @@ async function requestAI(body) {
     body: JSON.stringify(body),
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "AI helper unavailable");
+  if (!response.ok) {
+    const serverError = data.error && typeof data.error === "object" ? data.error : { message: data.error };
+    const error = new Error(serverError.message || "AI helper unavailable");
+    error.fix = serverError.fix;
+    if (error.fix) console.warn("Sunventure AI fix:", error.fix);
+    throw error;
+  }
   return data;
 }
 
@@ -325,12 +331,11 @@ export default function App() {
       if (!Array.isArray(data.activities) || data.activities.length < 8) throw new Error("Not enough activities returned");
       setActivities(data.activities.slice(0, 8));
       setScreen("result");
-    } catch {
+    } catch (error) {
+      const message = error.message || (Platform.OS === "web" ? t.webError : t.nativeAnswerError);
       Alert.alert(
         t.answerErrorTitle,
-        Platform.OS === "web"
-          ? t.webError
-          : t.nativeAnswerError,
+        message,
       );
     } finally {
       setIsThinking(false);

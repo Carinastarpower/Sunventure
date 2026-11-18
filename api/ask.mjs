@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import OpenAI from "openai";
+import { getKey, invalidateKey, isInvalidOpenAIKeyError, toSafeError } from "../helper/getKey.mjs";
 
 function sendJson(response, status, body) {
   response.status(status).setHeader("Content-Type", "application/json; charset=utf-8");
@@ -16,6 +17,22 @@ function parseJson(text) {
   return JSON.parse(cleaned);
 }
 
+async function createResponse({ instructions, input }) {
+  const request = async (apiKey) => {
+    const client = new OpenAI({ apiKey });
+    return client.responses.create({ model: "gpt-5.6-luna", instructions, input });
+  };
+  let apiKey = await getKey();
+  try {
+    return await request(apiKey);
+  } catch (error) {
+    if (!isInvalidOpenAIKeyError(error)) throw error;
+    invalidateKey(apiKey);
+    apiKey = await getKey({ forceRefresh: true });
+    return request(apiKey);
+  }
+}
+
 export default async function handler(request, response) {
   if (request.method === "OPTIONS") {
     response.status(204).setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -25,30 +42,21 @@ export default async function handler(request, response) {
   }
 
   if (request.method !== "POST") {
-    sendJson(response, 405, { error: "Method not allowed" });
+    sendJson(response, 405, { error: { message: "Method not allowed.", fix: "Send a POST request to /api/ask." } });
     return;
   }
 
   try {
     const answers = typeof request.body === "string" ? JSON.parse(request.body) : request.body || {};
 
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is missing from the Vercel environment");
-    }
-
     const brief = await fs.readFile(path.join(process.cwd(), "BRIEF.md"), "utf8");
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     if (answers.mode === "question") {
       if (typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.previousAnswers) || !Array.isArray(answers.askedQuestions)) {
-        sendJson(response, 400, { error: "The question request is incomplete." });
+        sendJson(response, 400, { error: { message: "The question request is incomplete.", fix: "Go back and answer the language and question fields." } });
         return;
       }
       const questionInstructions = `${brief}\n\nCreate one new question in ${answers.language} about the category "${answers.category}" to help choose safe activities for an older adult. This is question ${answers.askedQuestions.length + 1} of 8. Start broad, then use the previous answers to make later questions more specific. Never repeat or closely rephrase a previous question. Do not ask for a name, address, health information, or other personal information. Return only valid JSON in this exact shape: {"question":"one simple question","options":["six short answer choices"]}. The six choices must be in ${answers.language}.\n\nPrevious questions:\n${answers.askedQuestions.join("\n") || "None"}\n\nPrevious answers:\n${answers.previousAnswers.map(({ question, answer }) => `${question} — ${answer}`).join("\n") || "None"}`;
-      let questionResponse = await client.responses.create({
-        model: "gpt-5.6-luna",
-        instructions: questionInstructions,
-        input: "Create the next question now.",
-      });
+      let questionResponse = await createResponse({ instructions: questionInstructions, input: "Create the next question now." });
       let questionData;
       try {
         questionData = parseJson(questionResponse.output_text);
@@ -56,11 +64,7 @@ export default async function handler(request, response) {
         questionData = { question: questionResponse.output_text, options: [] };
       }
       if (answers.askedQuestions.some((previous) => normalizedQuestion(previous) === normalizedQuestion(questionData.question))) {
-        questionResponse = await client.responses.create({
-          model: "gpt-5.6-luna",
-          instructions: `${questionInstructions}\nYour last draft was a repeat. Write a completely different question now.`,
-          input: "Create a different next question now.",
-        });
+        questionResponse = await createResponse({ instructions: `${questionInstructions}\nYour last draft was a repeat. Write a completely different question now.`, input: "Create a different next question now." });
         try {
           questionData = parseJson(questionResponse.output_text);
         } catch {
@@ -72,11 +76,10 @@ export default async function handler(request, response) {
     }
 
     if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 7) {
-      sendJson(response, 400, { error: "Please answer each question." });
+      sendJson(response, 400, { error: { message: "Please answer each question.", fix: "Go back and finish the questions before asking for activities." } });
       return;
     }
-    const completion = await client.responses.create({
-      model: "gpt-5.6-luna",
+    const completion = await createResponse({
       instructions: `${brief}\n\nSuggest at least eight safe, simple activities using all of the user's answers below. Do not ask a question. Reply in ${answers.language}. Keep each activity to a short title and one short sentence. Do not include personal information or invent facts. Return only valid JSON in this exact shape: {"activities":["eight short activities"]}.\n\nUser answers:\n${answers.answers.map(({ question, answer }) => `${question} — ${answer}`).join("\n")}`,
       input: "Suggest eight activities now.",
     });
@@ -89,12 +92,13 @@ export default async function handler(request, response) {
       activities = completion.output_text.split(/\n+/).map((item) => item.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean).slice(0, 8);
     }
     if (activities.length < 8) {
-      sendJson(response, 500, { error: "The activity helper could not find enough ideas." });
+      sendJson(response, 500, { error: { message: "The activity helper could not find enough ideas.", fix: "Try the request again once; if it continues, check the AI helper logs." } });
       return;
     }
     sendJson(response, 200, { activities });
   } catch (error) {
-    console.error("Sunventure Vercel function failed:", error.message);
-    sendJson(response, 500, { error: "The activity helper could not answer." });
+    const safeError = toSafeError(error, "The activity helper could not answer.", "Check MindDo key settings and the server logs.");
+    console.error("Sunventure Vercel fix:", safeError.fix);
+    sendJson(response, 500, { error: safeError });
   }
 }

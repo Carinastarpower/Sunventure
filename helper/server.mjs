@@ -1,5 +1,6 @@
 import http from "node:http";
 import { askSunventureAI, askSunventureQuestion } from "./askAI.mjs";
+import { toSafeError } from "./getKey.mjs";
 
 const port = Number(process.env.PORT || 8787);
 
@@ -10,6 +11,10 @@ function sendJson(response, status, body) {
     "Access-Control-Allow-Headers": "Content-Type",
   });
   response.end(JSON.stringify(body));
+}
+
+function sendError(response, status, message, fix) {
+  sendJson(response, status, { error: { message, fix } });
 }
 
 const server = http.createServer(async (request, response) => {
@@ -24,7 +29,7 @@ const server = http.createServer(async (request, response) => {
   }
 
   if (request.method !== "POST" || request.url !== "/ask") {
-    sendJson(response, 404, { error: "Not found" });
+    sendError(response, 404, "This helper route was not found.", "Use POST /ask from the Sunventure app.");
     return;
   }
 
@@ -34,7 +39,7 @@ const server = http.createServer(async (request, response) => {
     const answers = JSON.parse(rawBody);
     if (answers.mode === "question") {
       if (typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.previousAnswers) || !Array.isArray(answers.askedQuestions)) {
-        sendJson(response, 400, { error: "The question request is incomplete." });
+        sendError(response, 400, "The question request is incomplete.", "Go back and answer the language and question fields.");
         return;
       }
       const question = await askSunventureQuestion(answers);
@@ -43,18 +48,19 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 7) {
-      sendJson(response, 400, { error: "Please answer each question." });
+      sendError(response, 400, "Please answer each question.", "Go back and finish the questions before asking for activities.");
       return;
     }
     const activities = await askSunventureAI(answers);
     if (activities.length < 8) {
-      sendJson(response, 500, { error: "The activity helper could not find enough ideas." });
+      sendError(response, 500, "The activity helper could not find enough ideas.", "Try the request again once; if it continues, check the AI helper logs.");
       return;
     }
     sendJson(response, 200, { activities });
   } catch (error) {
-    console.error("Sunventure helper request failed:", error.message);
-    sendJson(response, 500, { error: "The activity helper could not answer." });
+    const safeError = toSafeError(error, "The activity helper could not answer.", "Check MindDo key settings, Wi-Fi, and the helper logs.");
+    console.error("Sunventure helper fix:", safeError.fix);
+    sendJson(response, 500, { error: safeError });
   }
 });
 
