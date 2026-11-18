@@ -37,8 +37,8 @@ function parseJson(text) {
   return JSON.parse(cleaned);
 }
 
-export async function askSunventureQuestion({ language, category, previousAnswers = [], askedQuestions = [] }) {
-  const instructions = `Create one new question in ${language} about the category "${category}" to help choose safe activities for an older adult. This is question ${askedQuestions.length + 1} of 8. Start broad, then use the previous answers to make later questions more specific. Never repeat or closely rephrase a previous question. Do not ask for a name, address, health information, or other personal information. Return only valid JSON in this exact shape: {"question":"one simple question","options":["six short answer choices"]}. The six choices must be in ${language}.\n\nPrevious questions:\n${askedQuestions.join("\n") || "None"}\n\nPrevious answers:\n${previousAnswers.map(({ question, answer }) => `${question} — ${answer}`).join("\n") || "None"}`;
+export async function askSunventureQuestion({ language, category, options = [], previousAnswers = [], askedQuestions = [] }) {
+  const instructions = `Create one new question in ${language} about the category "${category}" to help choose safe activities for an older adult. This is question ${askedQuestions.length + 1} of 7. Start broad, then use the previous answers to make later questions more specific. Never repeat or closely rephrase a previous question. Do not ask for a name, address, health information, or other personal information. Return only valid JSON in this exact shape: {"question":"one simple question","options":["answer choices"]}. Use these answer choices exactly, translated only if needed: ${JSON.stringify(options)}.\n\nPrevious questions:\n${askedQuestions.join("\n") || "None"}\n\nPrevious answers:\n${previousAnswers.map(({ question, answer }) => `${question} — ${answer}`).join("\n") || "None"}`;
   let questionResponse = await createResponse({ instructions, input: "Create the next question now." });
   let questionData;
   try {
