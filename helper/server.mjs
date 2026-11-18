@@ -47,8 +47,8 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
-    if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 7) {
-      sendError(response, 400, "Please answer each question.", "Go back and finish the questions before asking for activities.");
+    if (answers.mode !== "activity" || typeof answers.language !== "string" || !answers.language.trim() || !Array.isArray(answers.answers) || answers.answers.length < 1) {
+      sendError(response, 400, "Please answer at least one question.", "Answer the preference questions before asking for activities.");
       return;
     }
     const activities = await askSunventureAI(answers);

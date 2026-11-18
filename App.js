@@ -276,6 +276,12 @@ export default function App() {
         previousAnswers,
         askedQuestions: previousQuestions,
       });
+      if (data.done === true) {
+        setQuestion("");
+        setQuestionOptions([]);
+        setScreen("time");
+        return;
+      }
       const nextQuestion = typeof data.question === "string" && data.question.trim() ? data.question : questionTemplate.question;
       const nextOptions = Array.isArray(data.options) && data.options.length > 0 ? data.options : questionTemplate.options;
       setQuestion(nextQuestion);

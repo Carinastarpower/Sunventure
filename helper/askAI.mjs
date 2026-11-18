@@ -37,25 +37,31 @@ function parseJson(text) {
   return JSON.parse(cleaned);
 }
 
+function asksForActivityChoice(question) {
+  return /what (do|would) you (want|like) to do|what kind of activity|what activity|which activity|what do you want to do|what would you like to do/i.test(question || "");
+}
+
 export async function askSunventureQuestion({ language, category, options = [], previousAnswers = [], askedQuestions = [] }) {
-  const instructions = `Create one new, simple question in ${language} to help choose a safe activity for an older adult. This is question ${askedQuestions.length + 1} of 7. The first question may cover personality, but after that choose the single most useful next detail yourself from the user's previous answers. Do not follow a preset category list. Use the entire previous answer history to narrow the activity step by step. Never repeat or closely rephrase a previous question, and never ask a broad question about a preference that the user has already answered. For example, if the user chose Introverted, do not ask "Which type of gathering would feel best?" or another generic group question; ask a new, more useful detail such as whether they prefer a quiet creative, learning, relaxing, or active activity. If the user chose Extroverted, ask a new detail that helps distinguish the kind of social activity they would enjoy. Do not ask for a name, address, health information, or other personal information. Return only valid JSON in this exact shape: {"question":"one simple question","options":["four to six short answer choices"]}. ${options.length > 0 ? `For this first question, use these answer choices exactly, translated only if needed: ${JSON.stringify(options)}.` : "For later questions, create answer choices that fit the new question and the previous answers."}\n\nPrevious questions:\n${askedQuestions.join("\n") || "None"}\n\nPrevious answers:\n${previousAnswers.map(({ question, answer }) => `${question} — ${answer}`).join("\n") || "None"}`;
+  const instructions = `Create one new, simple preference question in ${language} to help choose a safe activity for an older adult. This is question ${askedQuestions.length + 1} of 7 maximum. You may finish early when the previous answers already give enough information to suggest activities. If you finish, return {"done":true,"question":"","options":[]} and do not ask another question. The first question may cover personality, but after that choose the single most useful next detail yourself from the user's previous answers. Do not follow a preset category list. Use the entire previous answer history to narrow the activity step by step. Never repeat or closely rephrase a previous question, and never ask what the user wants to do, what activity they want, or what kind of activity they want. Ask only preference questions that help choose an activity. For example, if the user chose Introverted, do not ask a generic gathering or group question; ask a new preference such as quiet versus stimulating, creative versus learning, or indoor versus outdoor. If the user chose Extroverted, ask a new preference that helps distinguish the kind of social setting or energy they enjoy. Do not ask for a name, address, health information, or other personal information. Return only valid JSON in this exact shape: {"done":false,"question":"one simple preference question","options":["four to six short answer choices"]}. ${options.length > 0 ? `For this first question, use these answer choices exactly, translated only if needed: ${JSON.stringify(options)}.` : "For later questions, create answer choices that fit the new preference question and the previous answers."}\n\nPrevious questions:\n${askedQuestions.join("\n") || "None"}\n\nPrevious answers:\n${previousAnswers.map(({ question, answer }) => `${question} — ${answer}`).join("\n") || "None"}`;
   let questionResponse = await createResponse({ instructions, input: "Create the next question now." });
   let questionData;
   try {
     questionData = parseJson(questionResponse);
   } catch {
-    questionData = { question: questionResponse, options: [] };
+    questionData = { done: false, question: questionResponse, options: [] };
   }
+  if (questionData.done === true) return { done: true, question: "", options: [] };
   let question = questionData.question;
-  if (askedQuestions.some((previous) => normalizedQuestion(previous) === normalizedQuestion(question))) {
-    questionResponse = await createResponse({ instructions: `${instructions}\nYour last draft was a repeat. Write a completely different question now.`, input: "Create a different next question now." });
+  if (askedQuestions.some((previous) => normalizedQuestion(previous) === normalizedQuestion(question)) || asksForActivityChoice(question)) {
+    questionResponse = await createResponse({ instructions: `${instructions}\nYour last draft was invalid because it repeated a question or asked what activity the user wants. Write a different preference question now.`, input: "Create a different preference question now." });
     try {
       questionData = parseJson(questionResponse);
     } catch {
-      questionData = { question: questionResponse, options: [] };
+      questionData = { done: false, question: questionResponse, options: [] };
     }
   }
-  return { question: questionData.question, options: Array.isArray(questionData.options) ? questionData.options : [] };
+  if (questionData.done === true) return { done: true, question: "", options: [] };
+  return { done: false, question: questionData.question, options: Array.isArray(questionData.options) ? questionData.options : [] };
 }
 
 export async function askSunventureAI({ language, answers }) {
