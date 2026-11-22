@@ -137,6 +137,7 @@ const translations = {
     reminderBody: "Sunventure can remind you at this time.",
     changeTime: "Change time",
     findActivity: "Find A Activity",
+    findingActivity: "Finding a activity..",
     useAnswers: "The AI uses your answers to find three activities.",
     resultEyebrow: "YOUR SUNVENTURE IDEAS",
     resultTitle: "Choose one activity:",
@@ -177,6 +178,7 @@ const translations = {
     reminderBody: "Sunventure 可以在这个时间提醒你。",
     changeTime: "更改时间",
     findActivity: "寻找一个活动",
+    findingActivity: "正在寻找活动……",
     useAnswers: "AI 会使用你的回答来找到三项活动。",
     resultEyebrow: "你的 SUNVENTURE 点子",
     resultTitle: "选择一项活动：",
@@ -217,6 +219,7 @@ const translations = {
     reminderBody: "Sunventure puede recordártelo a esta hora.",
     changeTime: "Cambiar hora",
     findActivity: "Buscar una actividad",
+    findingActivity: "Buscando una actividad…",
     useAnswers: "La IA usará tus respuestas para encontrar tres actividades.",
     resultEyebrow: "TUS IDEAS SUNVENTURE",
     resultTitle: "Elige una actividad:",
@@ -556,7 +559,7 @@ export default function App() {
                 <DateTimePicker value={answers.time} mode="time" onChange={(_, value) => { setShowTimePicker(false); if (value) setAnswers((current) => ({ ...current, time: value })); }} />
               )}
               <Pressable disabled={isThinking} style={[styles.primaryButton, isThinking && styles.disabled]} onPress={findActivity}>
-                <Text style={styles.primaryText}>{isThinking ? t.thinking : t.findActivity}</Text>
+                <Text style={styles.primaryText}>{isThinking ? t.findingActivity : t.findActivity}</Text>
               </Pressable>
               <Text style={styles.smallNote}>{t.useAnswers}</Text>
             </View>
@@ -579,7 +582,7 @@ export default function App() {
               <Text style={styles.smallNote}>{reminderSet ? reminderMessage : t.chooseActivity}</Text>
               <Text style={styles.smallNote}>{t.differentIdea}</Text>
               <Pressable disabled={isThinking} style={[styles.primaryButton, isThinking && styles.disabled]} onPress={() => findActivity({ previousActivities: activities })}>
-                <Text style={styles.primaryText}>{isThinking ? t.thinking : t.tryAnother}</Text>
+                <Text style={styles.primaryText}>{isThinking ? t.findingActivity : t.tryAnother}</Text>
               </Pressable>
             </View>
           )}
