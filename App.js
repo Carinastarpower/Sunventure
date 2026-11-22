@@ -509,7 +509,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   webShell: Platform.select({ web: { flex: 1, alignItems: "center", backgroundColor: "#E8E3D9" }, default: { flex: 1 } }),
-  safe: Platform.select({ web: { flex: 1, width: "100%", maxWidth: 400, backgroundColor: "#FFF8E8" }, default: { flex: 1, backgroundColor: "#FFF8E8" } }),
+  safe: Platform.select({ web: { flex: 1, width: "100%", backgroundColor: "#FFF8E8" }, default: { flex: 1, backgroundColor: "#FFF8E8" } }),
   container: { flexGrow: 1, padding: 24, paddingTop: 36, justifyContent: "center" },
   logo: { color: "#F28C28", fontSize: 27, fontWeight: "800", letterSpacing: 0.3 },
   tagline: { color: "#675F53", fontSize: 16, marginTop: 4, marginBottom: 22 },

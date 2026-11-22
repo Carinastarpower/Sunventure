@@ -21,7 +21,7 @@ Verified OpenAI model with “luna” in its name: `gpt-5.6-luna`
 
 ## Web and Vercel
 
-The web build uses the same Expo SDK 58 app. The browser keeps the app in a centered phone-sized frame (up to 400 pixels wide); Expo Go keeps its existing native layout. On the web, the app calls `api/ask.mjs`, a small Vercel function. In Expo Go, it continues to call the local helper above.
+The web build uses the same Expo SDK 58 app. The website fills the entire browser window; Expo Go keeps its existing native layout. On the web, the app calls `api/ask.mjs`, a small Vercel function. In Expo Go, it continues to call the local helper above.
 
 The AI key comes from `getKey()`. Server code reads `KEYGEN_URL` and `KEYGEN_TOKEN`, asks MindDo for a short-lived OpenAI key, caches it until `expiresAt`, and refreshes it once if OpenAI rejects it. The key and token are never bundled into the app. `.env` and `.env*` files stay ignored by Git.
 
@@ -40,7 +40,7 @@ To test the production-shaped web bundle locally, run `npx expo export -p web` a
 - Added a language page as the first screen. After choosing English, Chinese, or Spanish, the original welcome page and the rest of the app use that language. The first question may use the personality example, then AI chooses up to seven narrowing preference questions from the user's answers, can stop early when enough is known, and never asks what activity the user wants. It then suggests eight activities and a reminder.
 - Added local phone storage and a back button on each step.
 - Added the computer-only Node helper. It calls server-only `getKey()`, sends the full `BRIEF.md` instructions to OpenAI, and never puts the key in the app.
-- Added Expo web support, the centered phone frame, the Vercel AI function, and Vercel's single-page-app rewrite configuration.
+- Added Expo web support, the full-screen website layout, the Vercel AI function, and Vercel's single-page-app rewrite configuration.
 
 ## Maybe Later
 
