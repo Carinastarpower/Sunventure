@@ -14,7 +14,7 @@ The phone and computer must be on the same Wi-Fi. The helper uses the computer a
 ## Try the MVP in 2 steps
 
 1. In two terminals, run `npm run helper` and `npx expo start --lan`, then open the app in Expo Go.
-2. Choose a language, tap `Continue`, answer the seven preference questions, choose one of the eight activities, and set the reminder.
+2. Choose a language, tap `Continue`, answer the preference questions, choose one of the three activities, and set the reminder.
 
 Expo Go SDK: 58
 Verified OpenAI model with “luna” in its name: `gpt-5.6-luna`
@@ -37,7 +37,7 @@ To test the production-shaped web bundle locally, run `npx expo export -p web` a
 ## Done
 
 - Created the SDK 58 Expo app.
-- Added a language page as the first screen. After choosing English, Chinese, or Spanish, the original welcome page and the rest of the app use that language. The first question may use the personality example, then AI chooses up to seven narrowing preference questions from the user's answers, can stop early when enough is known, and never asks what activity the user wants. It then suggests eight activities and a reminder.
+- Added a language page as the first screen. After choosing English, Chinese, or Spanish, the original welcome page and the rest of the app use that language. The first question may use the personality example, then AI chooses up to seven narrowing preference questions from the user's answers, can stop early when enough is known, and never asks what activity the user wants. It then suggests three activities at a time; Try another idea replaces them with three fresh suggestions.
 - Added local phone storage and a back button on each step.
 - Added the computer-only Node helper. It calls server-only `getKey()`, sends the full `BRIEF.md` instructions to OpenAI, and never puts the key in the app.
 - Added Expo web support, the full-screen website layout, the Vercel AI function, and Vercel's single-page-app rewrite configuration.

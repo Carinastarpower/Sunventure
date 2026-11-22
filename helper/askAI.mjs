@@ -64,15 +64,15 @@ export async function askSunventureQuestion({ language, category, options = [], 
   return { done: false, question: questionData.question, options: Array.isArray(questionData.options) ? questionData.options : [] };
 }
 
-export async function askSunventureAI({ language, answers }) {
+export async function askSunventureAI({ language, answers, previousActivities = [] }) {
   const response = await createResponse({
-    instructions: `Suggest at least eight safe, simple activities using all of the user's answers below. Do not ask a question. Reply in ${language}. Keep each activity to a short title and one short sentence. Do not include personal information or invent facts. Return only valid JSON in this exact shape: {"activities":["eight short activities"]}.\n\nUser answers:\n${answers.map(({ question, answer }) => `${question} — ${answer}`).join("\n")}`,
-    input: "Suggest eight activities now.",
+    instructions: `Suggest exactly three fresh, safe, simple activities using all of the user's answers below. Do not ask a question. Reply in ${language}. Keep each activity to a short title and one short sentence. Do not include personal information or invent facts. Do not repeat the previous activity ideas unless necessary. Return only valid JSON in this exact shape: {"activities":["three short activities"]}.\n\nUser answers:\n${answers.map(({ question, answer }) => `${question} — ${answer}`).join("\n")}\n\nPrevious activity ideas to avoid:\n${previousActivities.join("\n") || "None"}`,
+    input: "Suggest three fresh activities now.",
   });
   try {
     const parsed = parseJson(response);
     return Array.isArray(parsed.activities) ? parsed.activities : [];
   } catch {
-    return response.split(/\n+/).map((item) => item.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean).slice(0, 8);
+    return response.split(/\n+/).map((item) => item.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean).slice(0, 3);
   }
 }

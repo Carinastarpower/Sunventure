@@ -69,7 +69,7 @@ const translations = {
     tagline: "A simple idea for a brighter day.",
     welcomeEyebrow: "WELCOME",
     welcomeTitle: "Find something good to do.",
-    welcomeBody: "Choose a language, answer seven simple questions about what you like, and Sunventure will suggest eight activities.",
+    welcomeBody: "Choose a language, answer simple questions about what you like, and Sunventure will suggest three activities.",
     safety: "✓ We will not ask for personal information.",
     continue: "Continue",
     languageEyebrow: "LANGUAGE",
@@ -87,7 +87,7 @@ const translations = {
     reminderBody: "Sunventure can remind you at this time.",
     changeTime: "Change time",
     findActivity: "Find A Activity",
-    useAnswers: "The AI uses your answers to find eight activities.",
+    useAnswers: "The AI uses your answers to find three activities.",
     resultEyebrow: "YOUR SUNVENTURE IDEAS",
     resultTitle: "Choose one activity:",
     reminderSet: (time) => `✓ Your reminder is set for ${time}.`,
@@ -108,7 +108,7 @@ const translations = {
     tagline: "让每一天更明亮的简单点子。",
     welcomeEyebrow: "欢迎",
     welcomeTitle: "找点有趣的事做吧。",
-    welcomeBody: "选择语言，回答七个关于你喜好的简单问题，Sunventure 会为你推荐八项活动。",
+    welcomeBody: "选择语言，回答关于你喜好的简单问题，Sunventure 会为你推荐三项活动。",
     safety: "✓ 我们不会询问个人信息。",
     continue: "继续",
     languageEyebrow: "语言",
@@ -126,7 +126,7 @@ const translations = {
     reminderBody: "Sunventure 可以在这个时间提醒你。",
     changeTime: "更改时间",
     findActivity: "寻找一个活动",
-    useAnswers: "AI 会使用你的回答来找到八项活动。",
+    useAnswers: "AI 会使用你的回答来找到三项活动。",
     resultEyebrow: "你的 SUNVENTURE 点子",
     resultTitle: "选择一项活动：",
     reminderSet: (time) => `✓ 已为你设置 ${time} 的提醒。`,
@@ -147,7 +147,7 @@ const translations = {
     tagline: "Una idea sencilla para un día más alegre.",
     welcomeEyebrow: "BIENVENIDO",
     welcomeTitle: "Encuentra algo bueno que hacer.",
-    welcomeBody: "Elige un idioma, responde siete preguntas sencillas sobre tus gustos y Sunventure sugerirá ocho actividades.",
+    welcomeBody: "Elige un idioma, responde preguntas sencillas sobre tus gustos y Sunventure sugerirá tres actividades.",
     safety: "✓ No pediremos información personal.",
     continue: "Continuar",
     languageEyebrow: "IDIOMA",
@@ -165,7 +165,7 @@ const translations = {
     reminderBody: "Sunventure puede recordártelo a esta hora.",
     changeTime: "Cambiar hora",
     findActivity: "Buscar una actividad",
-    useAnswers: "La IA usará tus respuestas para encontrar ocho actividades.",
+    useAnswers: "La IA usará tus respuestas para encontrar tres actividades.",
     resultEyebrow: "TUS IDEAS SUNVENTURE",
     resultTitle: "Elige una actividad:",
     reminderSet: (time) => `✓ Tu recordatorio está programado para las ${time}.`,
@@ -350,15 +350,15 @@ export default function App() {
     return true;
   }
 
-  async function findActivity() {
+  async function findActivity({ previousActivities = activities } = {}) {
     setIsThinking(true);
     setActivities([]);
     setSelectedActivity("");
     setReminderSet(false);
     try {
-      const data = await requestAI({ mode: "activity", language: answers.language, answers: questionAnswers });
-      if (!Array.isArray(data.activities) || data.activities.length < 8) throw new Error("Not enough activities returned");
-      setActivities(data.activities.slice(0, 8));
+      const data = await requestAI({ mode: "activity", language: answers.language, answers: questionAnswers, previousActivities });
+      if (!Array.isArray(data.activities) || data.activities.length < 3) throw new Error("Not enough activities returned");
+      setActivities(data.activities.slice(0, 3));
       setScreen("result");
     } catch (error) {
       const message = error.message || (Platform.OS === "web" ? t.webError : t.nativeAnswerError);
@@ -496,8 +496,8 @@ export default function App() {
               </Pressable>
               <Text style={styles.smallNote}>{reminderSet ? t.reminderSet(timeText) : t.chooseActivity}</Text>
               <Text style={styles.smallNote}>{t.differentIdea}</Text>
-              <Pressable style={styles.primaryButton} onPress={() => setScreen("welcome")}>
-                <Text style={styles.primaryText}>{t.tryAnother}</Text>
+              <Pressable disabled={isThinking} style={[styles.primaryButton, isThinking && styles.disabled]} onPress={() => findActivity({ previousActivities: activities })}>
+                <Text style={styles.primaryText}>{isThinking ? t.thinking : t.tryAnother}</Text>
               </Pressable>
             </View>
           )}

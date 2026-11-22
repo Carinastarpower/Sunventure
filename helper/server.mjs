@@ -52,7 +52,7 @@ const server = http.createServer(async (request, response) => {
       return;
     }
     const activities = await askSunventureAI(answers);
-    if (activities.length < 8) {
+    if (activities.length < 3) {
       sendError(response, 500, "The activity helper could not find enough ideas.", "Try the request again once; if it continues, check the AI helper logs.");
       return;
     }

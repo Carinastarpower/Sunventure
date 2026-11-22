@@ -92,8 +92,8 @@ export default async function handler(request, response) {
       return;
     }
     const completion = await createResponse({
-      instructions: `${brief}\n\nSuggest at least eight safe, simple activities using all of the user's answers below. Do not ask a question. Reply in ${answers.language}. Keep each activity to a short title and one short sentence. Do not include personal information or invent facts. Return only valid JSON in this exact shape: {"activities":["eight short activities"]}.\n\nUser answers:\n${answers.answers.map(({ question, answer }) => `${question} — ${answer}`).join("\n")}`,
-      input: "Suggest eight activities now.",
+      instructions: `${brief}\n\nSuggest exactly three fresh, safe, simple activities using all of the user's answers below. Do not ask a question. Reply in ${answers.language}. Keep each activity to a short title and one short sentence. Do not include personal information or invent facts. Do not repeat the previous activity ideas unless necessary. Return only valid JSON in this exact shape: {"activities":["three short activities"]}.\n\nUser answers:\n${answers.answers.map(({ question, answer }) => `${question} — ${answer}`).join("\n")}\n\nPrevious activity ideas to avoid:\n${(answers.previousActivities || []).join("\n") || "None"}`,
+      input: "Suggest three fresh activities now.",
     });
 
     let activities = [];
@@ -101,9 +101,9 @@ export default async function handler(request, response) {
       const parsed = parseJson(completion.output_text);
       activities = Array.isArray(parsed.activities) ? parsed.activities : [];
     } catch {
-      activities = completion.output_text.split(/\n+/).map((item) => item.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean).slice(0, 8);
+      activities = completion.output_text.split(/\n+/).map((item) => item.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean).slice(0, 3);
     }
-    if (activities.length < 8) {
+    if (activities.length < 3) {
       sendJson(response, 500, { error: { message: "The activity helper could not find enough ideas.", fix: "Try the request again once; if it continues, check the AI helper logs." } });
       return;
     }
