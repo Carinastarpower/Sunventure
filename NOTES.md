@@ -38,6 +38,7 @@ To test the production-shaped web bundle locally, run `npx expo export -p web` a
 
 - Created the SDK 58 Expo app.
 - Added a language page as the first screen. After choosing English, Chinese, or Spanish, the original welcome page and the rest of the app use that language. The first question may use the personality example, then AI chooses up to seven narrowing preference questions from the user's answers, can stop early when enough is known, and never asks what activity the user wants. It then suggests three activities at a time; Try another idea replaces them with three fresh suggestions.
+- AI activity suggestions are gentle and older-adult friendly: they use simple words and avoid puzzles, riddles, trivia, complex tasks, and high-effort activities.
 - Added local phone storage and a back button on each step.
 - Added the computer-only Node helper. It calls server-only `getKey()`, sends the full `BRIEF.md` instructions to OpenAI, and never puts the key in the app.
 - Added Expo web support, the full-screen website layout, the Vercel AI function, and Vercel's single-page-app rewrite configuration.
