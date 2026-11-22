@@ -20,6 +20,56 @@ const STORAGE_KEY = "sunventure-v1-answers";
 const AI_QUESTION_COUNT = 7;
 const MULTI_SELECT_QUESTION_NUMBERS = [1, 5, 7];
 
+function createDefaultTime() {
+  const time = new Date();
+  time.setHours(0, 0, 0, 0);
+  return time;
+}
+
+function formatTimeInput(time) {
+  return `${String(time.getHours()).padStart(2, "0")}:${String(time.getMinutes()).padStart(2, "0")}`;
+}
+
+function parseTimeInput(value) {
+  const match = String(value).match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return null;
+  return { hours, minutes };
+}
+
+function escapeCalendarText(value) {
+  return String(value).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+}
+
+function downloadCalendarReminder(title, reminderTime) {
+  const endTime = new Date(reminderTime.getTime() + 30 * 60 * 1000);
+  const toCalendarDate = (value) => value.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const calendar = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Sunventure//Reminder//EN",
+    "BEGIN:VEVENT",
+    `UID:sunventure-${Date.now()}@sunventure.app`,
+    `DTSTAMP:${toCalendarDate(new Date())}`,
+    `DTSTART:${toCalendarDate(reminderTime)}`,
+    `DTEND:${toCalendarDate(endTime)}`,
+    `SUMMARY:${escapeCalendarText(`Sunventure: ${title}`)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  const blob = new Blob([calendar], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "sunventure-reminder.ics";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 const questionSets = {
   English: [
     { category: "personality", question: "Personality:", options: ["Introverted", "Extroverted", "Curious", "Creative", "Calm", "Energetic"] },
@@ -91,6 +141,7 @@ const translations = {
     resultEyebrow: "YOUR SUNVENTURE IDEAS",
     resultTitle: "Choose one activity:",
     reminderSet: (time) => `✓ Your reminder is set for ${time}.`,
+    calendarSaved: (time) => `✓ A calendar reminder for ${time} was downloaded. Open it to add it to your calendar.`,
     chooseActivity: "Choose an activity before setting a reminder.",
     setReminder: "Set reminder",
     selectedActivity: (activity) => `You chose: ${activity}`,
@@ -130,6 +181,7 @@ const translations = {
     resultEyebrow: "你的 SUNVENTURE 点子",
     resultTitle: "选择一项活动：",
     reminderSet: (time) => `✓ 已为你设置 ${time} 的提醒。`,
+    calendarSaved: (time) => `✓ 已下载 ${time} 的日历提醒。打开文件即可添加到日历。`,
     chooseActivity: "请选择一项活动，然后设置提醒。",
     setReminder: "设置提醒",
     selectedActivity: (activity) => `你选择了：${activity}`,
@@ -169,6 +221,7 @@ const translations = {
     resultEyebrow: "TUS IDEAS SUNVENTURE",
     resultTitle: "Elige una actividad:",
     reminderSet: (time) => `✓ Tu recordatorio está programado para las ${time}.`,
+    calendarSaved: (time) => `✓ Se descargó un recordatorio para las ${time}. Ábrelo para añadirlo a tu calendario.`,
     chooseActivity: "Elige una actividad antes de programar un recordatorio.",
     setReminder: "Programar recordatorio",
     selectedActivity: (activity) => `Elegiste: ${activity}`,
@@ -225,7 +278,7 @@ function BackButton({ onPress, label }) {
 
 export default function App() {
   const [screen, setScreen] = useState("language");
-  const [answers, setAnswers] = useState({ language: "", time: new Date() });
+  const [answers, setAnswers] = useState({ language: "", time: createDefaultTime() });
   const [questionAnswers, setQuestionAnswers] = useState([]);
   const [question, setQuestion] = useState("");
   const [questionOptions, setQuestionOptions] = useState([]);
@@ -237,17 +290,20 @@ export default function App() {
   const [selectedActivity, setSelectedActivity] = useState("");
   const [reminderSet, setReminderSet] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [webTimeText, setWebTimeText] = useState(formatTimeInput(createDefaultTime()));
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((saved) => {
       if (!saved) return;
       try {
         const parsed = JSON.parse(saved);
+        const restoredTime = parsed.time ? new Date(parsed.time) : null;
         setAnswers((current) => ({
           ...current,
-          time: parsed.time ? new Date(parsed.time) : current.time,
+          time: restoredTime || current.time,
           language: "",
         }));
+        if (restoredTime) setWebTimeText(formatTimeInput(restoredTime));
         if (Array.isArray(parsed.questionAnswers)) setQuestionAnswers(parsed.questionAnswers);
       } catch {
         // A damaged local save should not stop the app.
@@ -336,10 +392,14 @@ export default function App() {
   }
 
   async function scheduleReminder(title) {
-    const permission = await Notifications.requestPermissionsAsync();
-    if (permission.status !== "granted") return false;
     const reminderTime = new Date(answers.time);
     if (reminderTime <= new Date()) reminderTime.setDate(reminderTime.getDate() + 1);
+    if (Platform.OS === "web") {
+      downloadCalendarReminder(title, reminderTime);
+      return true;
+    }
+    const permission = await Notifications.requestPermissionsAsync();
+    if (permission.status !== "granted") return false;
     await Notifications.scheduleNotificationAsync({
       content: { title: t.notificationTitle, body: t.notificationBody(title) },
       trigger: {
@@ -374,8 +434,8 @@ export default function App() {
   async function confirmActivity() {
     if (!selectedActivity || reminderSet) return;
     try {
-      await scheduleReminder(selectedActivity.split(".")[0]);
-      setReminderSet(true);
+      const scheduled = await scheduleReminder(selectedActivity.split(".")[0]);
+      if (scheduled) setReminderSet(true);
     } catch {
       // The activity still works if phone notifications are turned off.
     }
@@ -384,7 +444,18 @@ export default function App() {
   const t = translations[answers.language] || translations.English;
   const isMultiSelectQuestion = MULTI_SELECT_QUESTION_NUMBERS.includes(questionNumber);
   const hasAnswer = Array.isArray(answer) ? answer.length > 0 : Boolean(answer.trim());
-  const timeText = answers.time.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const timeText = formatTimeInput(answers.time);
+  const reminderMessage = Platform.OS === "web" ? t.calendarSaved(timeText) : t.reminderSet(timeText);
+
+  function updateWebTime(value) {
+    setWebTimeText(value);
+    const parsed = parseTimeInput(value);
+    if (parsed) {
+      const time = new Date(answers.time);
+      time.setHours(parsed.hours, parsed.minutes, 0, 0);
+      setAnswers((current) => ({ ...current, time }));
+    }
+  }
 
   return (
     <View style={styles.webShell}>
@@ -466,11 +537,22 @@ export default function App() {
               <Text style={styles.eyebrow}>{t.reminderEyebrow}</Text>
               <Text style={styles.title}>{t.reminderTitle}</Text>
               <Text style={styles.body}>{t.reminderBody}</Text>
-              <Pressable style={styles.timeButton} onPress={() => setShowTimePicker(true)}>
+              <Pressable style={styles.timeButton} onPress={() => { setShowTimePicker(true); setWebTimeText(formatTimeInput(answers.time)); }}>
                 <Text style={styles.timeText}>⏰ {timeText}</Text>
                 <Text style={styles.changeText}>{t.changeTime}</Text>
               </Pressable>
-              {showTimePicker && (
+              {showTimePicker && Platform.OS === "web" && (
+                <TextInput
+                  accessibilityLabel={t.changeTime}
+                  value={webTimeText}
+                  onChangeText={updateWebTime}
+                  placeholder="00:00"
+                  maxLength={5}
+                  keyboardType="numbers-and-punctuation"
+                  style={styles.timeInput}
+                />
+              )}
+              {showTimePicker && Platform.OS !== "web" && (
                 <DateTimePicker value={answers.time} mode="time" onChange={(_, value) => { setShowTimePicker(false); if (value) setAnswers((current) => ({ ...current, time: value })); }} />
               )}
               <Pressable disabled={isThinking} style={[styles.primaryButton, isThinking && styles.disabled]} onPress={findActivity}>
@@ -494,7 +576,7 @@ export default function App() {
               <Pressable disabled={!selectedActivity || reminderSet} style={[styles.primaryButton, (!selectedActivity || reminderSet) && styles.disabled]} onPress={confirmActivity}>
                 <Text style={styles.primaryText}>{t.setReminder}</Text>
               </Pressable>
-              <Text style={styles.smallNote}>{reminderSet ? t.reminderSet(timeText) : t.chooseActivity}</Text>
+              <Text style={styles.smallNote}>{reminderSet ? reminderMessage : t.chooseActivity}</Text>
               <Text style={styles.smallNote}>{t.differentIdea}</Text>
               <Pressable disabled={isThinking} style={[styles.primaryButton, isThinking && styles.disabled]} onPress={() => findActivity({ previousActivities: activities })}>
                 <Text style={styles.primaryText}>{isThinking ? t.thinking : t.tryAnother}</Text>
@@ -532,6 +614,7 @@ const styles = StyleSheet.create({
   timeButton: { borderWidth: 2, borderColor: "#E8DFD1", borderRadius: 16, padding: 18, backgroundColor: "#FFFCF6" },
   timeText: { color: "#27231E", fontSize: 27, fontWeight: "800" },
   changeText: { color: "#8D4C0B", fontSize: 15, marginTop: 5 },
+  timeInput: { borderWidth: 2, borderColor: "#E8DFD1", borderRadius: 14, padding: 14, marginTop: 12, color: "#27231E", fontSize: 22, backgroundColor: "#FFFCF6" },
   smallNote: { color: "#766D60", fontSize: 14, lineHeight: 20, marginTop: 16, textAlign: "center" },
   resultBox: { backgroundColor: "#FFF0D4", borderRadius: 18, padding: 20, marginBottom: 18 },
   resultText: { color: "#3B352D", fontSize: 22, lineHeight: 32, fontWeight: "600" },
