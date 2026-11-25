@@ -41,9 +41,14 @@ function asksForActivityChoice(question) {
   return /what (do|would) you (want|like) to do|what kind of activity|what activity|which activity|what do you want to do|what would you like to do|what sounds fun|what do you prefer|do you prefer (team|group) work|what topic|what do you like|which topics|what interests you|what are you interested in|\b(walk|walking|music|song|sing|garden|gardening|paint|painting|craft|crafts|puzzle|riddle|crossword|sudoku|trivia|cook|cooking|dance|dancing|book|reading|photo|photograph|bird|game|sport|exercise)\b/i.test(question || "");
 }
 
+function asksForHardToKnowFact(question) {
+  return /\bhow many\b|\bwhat year\b|\bwhat date\b|\bwhat is your (diagnosis|medication|blood pressure|address)\b|\bname (three|five)\b|\bexplain\b|\bdescribe in detail\b|\bwhat is the name of\b|\bremember when\b/i.test(question || "");
+}
+
 export async function askSunventureQuestion({ language, category, options = [], previousAnswers = [], askedQuestions = [] }) {
   const instructions = `Create one new, very simple preference question in ${language} to help choose a safe activity for an older adult. This is question ${askedQuestions.length + 1} of 7 maximum. You may finish early when the previous answers already give enough information to suggest activities. If you finish, return {"done":true,"question":"","options":[]} and do not ask another question. Use short sentences and common everyday words that are easy for an older adult to understand. Ask broad questions about daily life, comfort, surroundings, energy, or past experiences. Do not ask directly what topic the user likes. Do not list topic choices such as plants, music, or arts and crafts. Do not name, hint at, or describe a possible activity. Never mention walking, music, singing, gardening, painting, crafts, puzzles, riddles, cooking, dancing, books, photos, games, sports, or exercise in a question. Do not ask what sounds fun, what the user prefers to do, what activity they want, or whether they prefer team or group work. Do not ask them to choose an activity. Do not use hard words, jargon, or abstract words. The first question may cover personality, but after that choose the single most useful new detail yourself from the user's previous answers. Do not follow a preset category list. Use the entire previous answer history to narrow the activity step by step. Never repeat or closely rephrase a previous question. If the user chose Introverted, ask a new broad question about comfort or daily life instead of a group question. If the user chose Extroverted, ask a new broad question about social comfort or energy without asking them to choose an activity. Do not ask for a name, address, health information, or other personal information. Return only valid JSON in this exact shape: {"done":false,"question":"one short simple broad question","options":["four to six short answer choices"]}. For later questions, create answer choices that are broad and do not name possible activities or topics. ${options.length > 0 ? `For this first question, use these answer choices exactly, translated only if needed: ${JSON.stringify(options)}.` : ""}\n\nPrevious questions:\n${askedQuestions.join("\n") || "None"}\n\nPrevious answers:\n${previousAnswers.map(({ question, answer }) => `${question} — ${answer}`).join("\n") || "None"}`;
-  let questionResponse = await createResponse({ instructions, input: "Create the next question now." });
+  const easyAnswerRules = "Ask only about something the user definitely knows from everyday life. Never ask for exact facts, dates, numbers, specialist knowledge, difficult memory, or information the user may not know. If unsure, ask a simpler everyday question or finish early.";
+  let questionResponse = await createResponse({ instructions: `${instructions}\n${easyAnswerRules}`, input: "Create the next question now." });
   let questionData;
   try {
     questionData = parseJson(questionResponse);
@@ -52,8 +57,8 @@ export async function askSunventureQuestion({ language, category, options = [], 
   }
   if (questionData.done === true) return { done: true, question: "", options: [] };
   let question = questionData.question;
-  if (askedQuestions.some((previous) => normalizedQuestion(previous) === normalizedQuestion(question)) || asksForActivityChoice(question)) {
-    questionResponse = await createResponse({ instructions: `${instructions}\nYour last draft was invalid because it repeated a question or asked what activity the user wants. Write a different preference question now.`, input: "Create a different preference question now." });
+  if (askedQuestions.some((previous) => normalizedQuestion(previous) === normalizedQuestion(question)) || asksForActivityChoice(question) || asksForHardToKnowFact(question)) {
+    questionResponse = await createResponse({ instructions: `${instructions}\n${easyAnswerRules}\nYour last draft was invalid because it repeated a question, asked what activity the user wants, or asked for something the user may not know. Write a different easy everyday question now.`, input: "Create a different easy preference question now." });
     try {
       questionData = parseJson(questionResponse);
     } catch {
