@@ -37,7 +37,7 @@ To test the production-shaped web bundle locally, run `npx expo export -p web` a
 ## Done
 
 - Created the SDK 58 Expo app.
-- Added a language page as the first screen. After choosing English, Chinese, or Spanish, the original welcome page and the rest of the app use that language. The first question may use the personality example, then AI chooses up to seven narrowing preference questions from the user's answers, can stop early when enough is known, and never asks what activity the user wants. It then suggests three activities at a time; Try another idea replaces them with three fresh suggestions.
+- Added a language page as the first screen. After choosing English, Chinese, or Spanish, the original welcome page and the rest of the app use that language. The first question may use the personality example, then AI chooses up to twelve narrowing preference questions from the user's answers, can stop early when enough is known, and never asks what activity the user wants. Each question has no more than six clear answer choices. It then suggests three activities at a time; Try another idea replaces them with three fresh suggestions.
 - AI activity suggestions are gentle and older-adult friendly: they use simple words and avoid puzzles, riddles, trivia, complex tasks, and high-effort activities.
 - AI questions use simple everyday things the user is likely to know, such as how they feel or when they have energy. They avoid hard facts, exact numbers, specialist knowledge, difficult memory, and questions that may be unknown to the user.
 - Background music uses the piano-only track “Elementary” by Scott Buckley. It is licensed CC BY 4.0; keep the creator credit and source link when publishing: https://www.scottbuckley.com.au/library/elementary

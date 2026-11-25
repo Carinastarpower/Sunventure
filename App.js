@@ -20,7 +20,7 @@ import { useAudioPlaylist } from "expo-audio";
 
 const AI_HELPER_URL = "http://192.168.1.163:8787";
 const STORAGE_KEY = "sunventure-v1-answers";
-const AI_QUESTION_COUNT = 7;
+const AI_QUESTION_COUNT = 12;
 const MULTI_SELECT_QUESTION_NUMBERS = [1, 5, 7];
 const MUSIC_VOLUME = 0.2;
 const SOFT_MUSIC_SOURCE = "https://www.scottbuckley.com.au/library/wp-content/uploads/2017/07/sb_elementary.mp3";
@@ -178,7 +178,7 @@ const translations = {
     languageQuestion: "What language do you prefer?",
     languageBody: "Choose one language for your questions and activity idea.",
     back: "‹ Back",
-    questionEyebrow: (number) => `QUESTION ${number} OF 7`,
+    questionEyebrow: (number) => `QUESTION ${number} OF 12`,
     thinking: "Thinking of a question…",
     inputPlaceholder: "Type your answer",
     next: "Next",
@@ -223,7 +223,7 @@ const translations = {
     languageQuestion: "你喜欢使用哪种语言？",
     languageBody: "为你的问题和活动建议选择一种语言。",
     back: "‹ 返回",
-    questionEyebrow: (number) => `第 ${number} 个问题，共 7 个`,
+    questionEyebrow: (number) => `第 ${number} 个问题，共 12 个`,
     thinking: "正在想一个问题……",
     inputPlaceholder: "输入你的回答",
     next: "下一步",
@@ -268,7 +268,7 @@ const translations = {
     languageQuestion: "¿Qué idioma prefieres?",
     languageBody: "Elige un idioma para tus preguntas y tu idea de actividad.",
     back: "‹ Atrás",
-    questionEyebrow: (number) => `PREGUNTA ${number} DE 7`,
+    questionEyebrow: (number) => `PREGUNTA ${number} DE 12`,
     thinking: "Pensando en una pregunta…",
     inputPlaceholder: "Escribe tu respuesta",
     next: "Siguiente",
@@ -429,7 +429,7 @@ export default function App() {
   }, [answers, questionAnswers]);
 
   async function loadNextQuestion({ language, nextNumber, previousAnswers = questionAnswers, previousQuestions = askedQuestions }) {
-    const questionTemplate = questionSets[language][nextNumber - 1];
+    const questionTemplate = questionSets[language][nextNumber - 1] || { category: "the next best preference", question: "", options: [] };
     setScreen("aiQuestion");
     setQuestion("");
     setQuestionOptions([]);
@@ -452,7 +452,7 @@ export default function App() {
         return;
       }
       const nextQuestion = typeof data.question === "string" && data.question.trim() ? data.question : questionTemplate.question;
-      const nextOptions = Array.isArray(data.options) && data.options.length > 0 ? data.options : questionTemplate.options;
+      const nextOptions = Array.isArray(data.options) && data.options.length > 0 ? data.options.slice(0, 6) : questionTemplate.options.slice(0, 6);
       setQuestion(nextQuestion);
       setQuestionOptions(nextOptions);
       setAskedQuestions([...previousQuestions, nextQuestion]);
