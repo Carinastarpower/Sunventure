@@ -43,15 +43,17 @@ function escapeCalendarText(value) {
   return String(value).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
 }
 
-function downloadCalendarReminder(title, reminderTime) {
+function downloadCalendarReminder(title, reminderTime, eventId) {
   const endTime = new Date(reminderTime.getTime() + 30 * 60 * 1000);
   const toCalendarDate = (value) => value.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const calendar = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
+    "METHOD:REQUEST",
     "PRODID:-//Sunventure//Reminder//EN",
     "BEGIN:VEVENT",
-    `UID:sunventure-${Date.now()}@sunventure.app`,
+    `UID:${eventId}`,
+    "SEQUENCE:0",
     `DTSTAMP:${toCalendarDate(new Date())}`,
     `DTSTART:${toCalendarDate(reminderTime)}`,
     `DTEND:${toCalendarDate(endTime)}`,
@@ -64,6 +66,34 @@ function downloadCalendarReminder(title, reminderTime) {
   const link = document.createElement("a");
   link.href = url;
   link.download = "sunventure-reminder.ics";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function downloadCalendarCancellation(title, reminderTime, eventId) {
+  const toCalendarDate = (value) => value.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const calendar = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "METHOD:CANCEL",
+    "PRODID:-//Sunventure//Reminder//EN",
+    "BEGIN:VEVENT",
+    `UID:${eventId}`,
+    "SEQUENCE:1",
+    `DTSTAMP:${toCalendarDate(new Date())}`,
+    `DTSTART:${toCalendarDate(reminderTime)}`,
+    `SUMMARY:${escapeCalendarText(`Sunventure: ${title}`)}`,
+    "STATUS:CANCELLED",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  const blob = new Blob([calendar], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "sunventure-reminder-cancel.ics";
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -143,6 +173,9 @@ const translations = {
     resultTitle: "Choose one activity:",
     reminderSet: (time) => `✓ Your reminder is set for ${time}.`,
     calendarSaved: (time) => `✓ A calendar reminder for ${time} was downloaded. Open it to add it to your calendar.`,
+    cancelReminder: "Cancel reminder",
+    reminderCancelled: "✓ Your reminder was cancelled.",
+    calendarCancelled: "✓ A calendar cancellation file was downloaded. Open it to remove the reminder from your calendar.",
     chooseActivity: "Choose an activity before setting a reminder.",
     setReminder: "Set reminder",
     selectedActivity: (activity) => `You chose: ${activity}`,
@@ -184,6 +217,9 @@ const translations = {
     resultTitle: "选择一项活动：",
     reminderSet: (time) => `✓ 已为你设置 ${time} 的提醒。`,
     calendarSaved: (time) => `✓ 已下载 ${time} 的日历提醒。打开文件即可添加到日历。`,
+    cancelReminder: "取消提醒",
+    reminderCancelled: "✓ 已取消提醒。",
+    calendarCancelled: "✓ 已下载日历取消文件。打开它即可从日历中删除提醒。",
     chooseActivity: "请选择一项活动，然后设置提醒。",
     setReminder: "设置提醒",
     selectedActivity: (activity) => `你选择了：${activity}`,
@@ -225,6 +261,9 @@ const translations = {
     resultTitle: "Elige una actividad:",
     reminderSet: (time) => `✓ Tu recordatorio está programado para las ${time}.`,
     calendarSaved: (time) => `✓ Se descargó un recordatorio para las ${time}. Ábrelo para añadirlo a tu calendario.`,
+    cancelReminder: "Cancelar recordatorio",
+    reminderCancelled: "✓ Tu recordatorio fue cancelado.",
+    calendarCancelled: "✓ Se descargó un archivo para cancelar el recordatorio. Ábrelo para quitarlo de tu calendario.",
     chooseActivity: "Elige una actividad antes de programar un recordatorio.",
     setReminder: "Programar recordatorio",
     selectedActivity: (activity) => `Elegiste: ${activity}`,
@@ -292,6 +331,9 @@ export default function App() {
   const [activities, setActivities] = useState([]);
   const [selectedActivity, setSelectedActivity] = useState("");
   const [reminderSet, setReminderSet] = useState(false);
+  const [reminderCancelled, setReminderCancelled] = useState(false);
+  const [reminderId, setReminderId] = useState("");
+  const [scheduledReminderTime, setScheduledReminderTime] = useState(null);
   const [isThinking, setIsThinking] = useState(false);
   const [webTimeText, setWebTimeText] = useState(formatTimeInput(createDefaultTime()));
 
@@ -398,19 +440,21 @@ export default function App() {
     const reminderTime = new Date(answers.time);
     if (reminderTime <= new Date()) reminderTime.setDate(reminderTime.getDate() + 1);
     if (Platform.OS === "web") {
-      downloadCalendarReminder(title, reminderTime);
-      return true;
+      const safeTitle = title.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "");
+      const eventId = `sunventure-${formatTimeInput(reminderTime)}-${safeTitle}@sunventure.app`;
+      downloadCalendarReminder(title, reminderTime, eventId);
+      return { id: eventId, time: reminderTime };
     }
     const permission = await Notifications.requestPermissionsAsync();
     if (permission.status !== "granted") return false;
-    await Notifications.scheduleNotificationAsync({
+    const notificationId = await Notifications.scheduleNotificationAsync({
       content: { title: t.notificationTitle, body: t.notificationBody(title) },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
         date: reminderTime,
       },
     });
-    return true;
+    return { id: notificationId, time: reminderTime };
   }
 
   async function findActivity({ previousActivities = activities } = {}) {
@@ -418,6 +462,9 @@ export default function App() {
     setActivities([]);
     setSelectedActivity("");
     setReminderSet(false);
+    setReminderCancelled(false);
+    setReminderId("");
+    setScheduledReminderTime(null);
     try {
       const data = await requestAI({ mode: "activity", language: answers.language, answers: questionAnswers, previousActivities });
       if (!Array.isArray(data.activities) || data.activities.length < 3) throw new Error("Not enough activities returned");
@@ -438,9 +485,31 @@ export default function App() {
     if (!selectedActivity || reminderSet) return;
     try {
       const scheduled = await scheduleReminder(selectedActivity.split(".")[0]);
-      if (scheduled) setReminderSet(true);
+      if (scheduled) {
+        setReminderId(scheduled.id);
+        setScheduledReminderTime(scheduled.time);
+        setReminderCancelled(false);
+        setReminderSet(true);
+      }
     } catch {
       // The activity still works if phone notifications are turned off.
+    }
+  }
+
+  async function cancelReminder() {
+    if (!reminderSet || !reminderId || !scheduledReminderTime) return;
+    try {
+      if (Platform.OS === "web") {
+        downloadCalendarCancellation(selectedActivity.split(".")[0], scheduledReminderTime, reminderId);
+      } else {
+        await Notifications.cancelScheduledNotificationAsync(reminderId);
+      }
+      setReminderSet(false);
+      setReminderCancelled(true);
+      setReminderId("");
+      setScheduledReminderTime(null);
+    } catch {
+      Alert.alert(t.answerErrorTitle, Platform.OS === "web" ? t.webError : t.nativeAnswerError);
     }
   }
 
@@ -449,6 +518,7 @@ export default function App() {
   const hasAnswer = Array.isArray(answer) ? answer.length > 0 : Boolean(answer.trim());
   const timeText = formatTimeInput(answers.time);
   const reminderMessage = Platform.OS === "web" ? t.calendarSaved(timeText) : t.reminderSet(timeText);
+  const cancelledMessage = Platform.OS === "web" ? t.calendarCancelled : t.reminderCancelled;
 
   function updateWebTime(value) {
     setWebTimeText(value);
@@ -579,7 +649,12 @@ export default function App() {
               <Pressable disabled={!selectedActivity || reminderSet} style={[styles.primaryButton, (!selectedActivity || reminderSet) && styles.disabled]} onPress={confirmActivity}>
                 <Text style={styles.primaryText}>{t.setReminder}</Text>
               </Pressable>
-              <Text style={styles.smallNote}>{reminderSet ? reminderMessage : t.chooseActivity}</Text>
+              <Text style={styles.smallNote}>{reminderSet ? reminderMessage : reminderCancelled ? cancelledMessage : t.chooseActivity}</Text>
+              {reminderSet && (
+                <Pressable style={styles.secondaryButton} onPress={cancelReminder}>
+                  <Text style={styles.secondaryText}>{t.cancelReminder}</Text>
+                </Pressable>
+              )}
               <Text style={styles.smallNote}>{t.differentIdea}</Text>
               <Pressable disabled={isThinking} style={[styles.primaryButton, isThinking && styles.disabled]} onPress={() => findActivity({ previousActivities: activities })}>
                 <Text style={styles.primaryText}>{isThinking ? t.findingActivity : t.tryAnother}</Text>
@@ -611,6 +686,8 @@ const styles = StyleSheet.create({
   answerInput: { minHeight: 120, borderWidth: 2, borderColor: "#E8DFD1", borderRadius: 14, padding: 16, color: "#27231E", fontSize: 18, lineHeight: 26, backgroundColor: "#FFFCF6", textAlignVertical: "top" },
   primaryButton: { backgroundColor: "#F28C28", borderRadius: 14, paddingVertical: 16, alignItems: "center", marginTop: 24 },
   primaryText: { color: "#FFFFFF", fontSize: 19, fontWeight: "800" },
+  secondaryButton: { borderWidth: 2, borderColor: "#E8DFD1", borderRadius: 14, paddingVertical: 14, alignItems: "center", marginTop: 12, backgroundColor: "#FFFCF6" },
+  secondaryText: { color: "#8D4C0B", fontSize: 17, fontWeight: "800" },
   disabled: { opacity: 0.45 },
   backButton: { alignSelf: "flex-start", marginBottom: 18 },
   backText: { color: "#8D4C0B", fontSize: 17, fontWeight: "700" },
