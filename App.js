@@ -169,7 +169,6 @@ const languageOptions = [
 
 const translations = {
   English: {
-    tagline: "A simple idea for a brighter day.",
     welcomeEyebrow: "WELCOME",
     welcomeTitle: "Find something good to do.",
     welcomeBody: "Choose a language, answer simple questions about what you like, and Sunventure will suggest three activities.",
@@ -179,12 +178,11 @@ const translations = {
     languageQuestion: "What language do you prefer?",
     languageBody: "Choose one language for your questions and activity idea.",
     back: "‹ Back",
-    questionEyebrow: (number) => `QUESTION ${number} OF 7 · YOUR IDEAS`,
+    questionEyebrow: (number) => `QUESTION ${number} OF 7`,
     thinking: "Thinking of a question…",
     inputPlaceholder: "Type your answer",
     next: "Next",
-    oneQuestion: "One simple question at a time.",
-    selectAll: "You can choose more than one.",
+    selectAll: "You can choose more than one answer.",
     reminderEyebrow: "REMINDER",
     reminderTitle: "When would you like to do it?",
     reminderBody: "Sunventure can remind you at this time.",
@@ -192,7 +190,7 @@ const translations = {
     findActivity: "Find A Activity",
     findingActivity: "Finding a activity..",
     useAnswers: "The AI uses your answers to find three activities.",
-    resultEyebrow: "YOUR SUNVENTURE IDEAS",
+    resultEyebrow: "SUNVENTURE",
     resultTitle: "Choose one activity:",
     reminderSet: (time) => `✓ Your reminder is set for ${time}.`,
     calendarSaved: (time) => `✓ A calendar reminder for ${time} was downloaded. Open it to add it to your calendar.`,
@@ -217,7 +215,6 @@ const translations = {
     volume: (value) => `Volume ${value}%`,
   },
   Chinese: {
-    tagline: "让每一天更明亮的简单点子。",
     welcomeEyebrow: "欢迎",
     welcomeTitle: "找点有趣的事做吧。",
     welcomeBody: "选择语言，回答关于你喜好的简单问题，Sunventure 会为你推荐三项活动。",
@@ -227,11 +224,10 @@ const translations = {
     languageQuestion: "你喜欢使用哪种语言？",
     languageBody: "为你的问题和活动建议选择一种语言。",
     back: "‹ 返回",
-    questionEyebrow: (number) => `第 ${number} 个问题，共 7 个 · 你的想法`,
+    questionEyebrow: (number) => `第 ${number} 个问题，共 7 个`,
     thinking: "正在想一个问题……",
     inputPlaceholder: "输入你的回答",
     next: "下一步",
-    oneQuestion: "一次回答一个简单问题。",
     selectAll: "你可以选择多个答案。",
     reminderEyebrow: "提醒",
     reminderTitle: "你想什么时候做这件事？",
@@ -240,7 +236,7 @@ const translations = {
     findActivity: "寻找一个活动",
     findingActivity: "正在寻找活动……",
     useAnswers: "AI 会使用你的回答来找到三项活动。",
-    resultEyebrow: "你的 SUNVENTURE 点子",
+    resultEyebrow: "SUNVENTURE",
     resultTitle: "选择一项活动：",
     reminderSet: (time) => `✓ 已为你设置 ${time} 的提醒。`,
     calendarSaved: (time) => `✓ 已下载 ${time} 的日历提醒。打开文件即可添加到日历。`,
@@ -265,7 +261,6 @@ const translations = {
     volume: (value) => `音量 ${value}%`,
   },
   Spanish: {
-    tagline: "Una idea sencilla para un día más alegre.",
     welcomeEyebrow: "BIENVENIDO",
     welcomeTitle: "Encuentra algo bueno que hacer.",
     welcomeBody: "Elige un idioma, responde preguntas sencillas sobre tus gustos y Sunventure sugerirá tres actividades.",
@@ -275,12 +270,11 @@ const translations = {
     languageQuestion: "¿Qué idioma prefieres?",
     languageBody: "Elige un idioma para tus preguntas y tu idea de actividad.",
     back: "‹ Atrás",
-    questionEyebrow: (number) => `PREGUNTA ${number} DE 7 · TUS IDEAS`,
+    questionEyebrow: (number) => `PREGUNTA ${number} DE 7`,
     thinking: "Pensando en una pregunta…",
     inputPlaceholder: "Escribe tu respuesta",
     next: "Siguiente",
-    oneQuestion: "Una pregunta sencilla a la vez.",
-    selectAll: "Puedes elegir más de una opción.",
+    selectAll: "Puedes elegir más de una respuesta.",
     reminderEyebrow: "RECORDATORIO",
     reminderTitle: "¿Cuándo te gustaría hacerlo?",
     reminderBody: "Sunventure puede recordártelo a esta hora.",
@@ -288,7 +282,7 @@ const translations = {
     findActivity: "Buscar una actividad",
     findingActivity: "Buscando una actividad…",
     useAnswers: "La IA usará tus respuestas para encontrar tres actividades.",
-    resultEyebrow: "TUS IDEAS SUNVENTURE",
+    resultEyebrow: "SUNVENTURE",
     resultTitle: "Elige una actividad:",
     reminderSet: (time) => `✓ Tu recordatorio está programado para las ${time}.`,
     calendarSaved: (time) => `✓ Se descargó un recordatorio para las ${time}. Ábrelo para añadirlo a tu calendario.`,
@@ -601,7 +595,6 @@ export default function App() {
   }
 
   const t = translations[answers.language] || translations.English;
-  const isMultiSelectQuestion = MULTI_SELECT_QUESTION_NUMBERS.includes(questionNumber);
   const hasAnswer = Array.isArray(answer) ? answer.length > 0 : Boolean(answer.trim());
   const timeText = formatTimeInput(answers.time);
   const reminderMessage = Platform.OS === "web" ? t.calendarSaved(timeText) : t.reminderSet(timeText);
@@ -628,10 +621,8 @@ export default function App() {
             <Animated.View style={[styles.brandMark, { transform: [{ translateY: floatMotion.interpolate({ inputRange: [0, 1], outputRange: [0, -5] }) }] }]}><Text style={styles.brandMarkText}>☀</Text></Animated.View>
             <View>
               <Text style={styles.logo}>Sunventure</Text>
-              <Text style={styles.tagline}>{t.tagline}</Text>
             </View>
             <View style={styles.headerActions}>
-              <View style={styles.brandPill}><Text style={styles.brandPillText}>AI + YOU</Text></View>
               <View style={styles.musicControls}>
                 <Pressable accessibilityRole="button" accessibilityState={{ selected: musicPlaying }} style={[styles.musicButton, musicPlaying && styles.musicButtonOn]} onPress={toggleMusic}>
                   <Text style={styles.musicButtonText}>{musicPlaying ? `🔊 ${t.stopMusic}` : `🎵 ${t.playMusic}`}</Text>
@@ -704,8 +695,7 @@ export default function App() {
                   </Pressable>
                 </>
               )}
-              {isMultiSelectQuestion && <Text style={styles.smallNote}>{t.selectAll}</Text>}
-              <Text style={styles.smallNote}>{t.oneQuestion}</Text>
+              {questionNumber === 1 && <Text style={styles.selectAllNote}>{t.selectAll}</Text>}
             </Animated.View>
           )}
 
@@ -788,7 +778,7 @@ const styles = StyleSheet.create({
   brandRow: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
   brandMark: { width: 54, height: 54, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: "#F7B735", marginRight: 12, shadowColor: "#D28B13", shadowOpacity: 0.32, shadowRadius: 14, elevation: 4 },
   brandMarkText: { color: "#FFFFFF", fontSize: 29, fontWeight: "800" },
-  logo: { color: "#4A3215", fontSize: 30, fontWeight: "900", letterSpacing: 0.3 },
+  logo: { color: "#4A3215", fontSize: 34, fontWeight: "900", letterSpacing: 0.3 },
   tagline: { color: "#80683B", fontSize: 15, marginTop: 3 },
   headerActions: { marginLeft: "auto", alignItems: "flex-end", gap: 8 },
   musicControls: { flexDirection: "row", alignItems: "center", gap: 6 },
@@ -800,10 +790,10 @@ const styles = StyleSheet.create({
   volumeButton: { borderRadius: 18, paddingHorizontal: 10, paddingVertical: 8, backgroundColor: "#FFFDF2", borderWidth: 1, borderColor: "#E2D79A" },
   volumeButtonText: { color: "#6B531F", fontSize: 13, fontWeight: "800" },
   card: { backgroundColor: "#FFFDF2", borderRadius: 30, padding: 26, borderWidth: 1, borderColor: "#FFFFFF", shadowColor: "#B38324", shadowOpacity: 0.2, shadowRadius: 25, shadowOffset: { width: 0, height: 13 }, elevation: 5 },
-  eyebrow: { color: "#C47713", fontSize: 12, fontWeight: "900", letterSpacing: 1.5, marginBottom: 11 },
-  title: { color: "#4A3215", fontSize: 32, fontWeight: "900", lineHeight: 39, marginBottom: 13 },
-  body: { color: "#745F3F", fontSize: 18, lineHeight: 27, marginBottom: 20 },
-  safety: { color: "#3E7D53", fontSize: 16, lineHeight: 23, marginBottom: 20 },
+  eyebrow: { color: "#C47713", fontSize: 15, fontWeight: "900", letterSpacing: 1.5, marginBottom: 11 },
+  title: { color: "#4A3215", fontSize: 36, fontWeight: "900", lineHeight: 44, marginBottom: 15 },
+  body: { color: "#745F3F", fontSize: 20, lineHeight: 30, marginBottom: 22 },
+  safety: { color: "#3E7D53", fontSize: 18, lineHeight: 26, marginBottom: 22 },
   activityCard: { backgroundColor: "#FFF8D9", borderRadius: 18, padding: 10, marginBottom: 12, borderWidth: 1, borderColor: "#F6E5A5" },
   activityDetails: { color: "#695739", fontSize: 16, lineHeight: 23, paddingHorizontal: 14, marginTop: 2 },
   activityExample: { color: "#3E7D53", fontSize: 15, lineHeight: 22, paddingHorizontal: 14, marginTop: 6 },
@@ -812,9 +802,9 @@ const styles = StyleSheet.create({
   choices: { gap: 10 },
   choice: { borderWidth: 2, borderColor: "#E8D795", borderRadius: 17, paddingVertical: 15, paddingHorizontal: 17, backgroundColor: "#FFFDF2" },
   choiceSelected: { borderColor: "#F0A52E", backgroundColor: "#FFE8A3", shadowColor: "#D8931D", shadowOpacity: 0.18, shadowRadius: 8, elevation: 2 },
-  choiceText: { color: "#59472B", fontSize: 18, fontWeight: "700" },
+  choiceText: { color: "#59472B", fontSize: 20, lineHeight: 26, fontWeight: "700" },
   choiceTextSelected: { color: "#8B5609" },
-  answerInput: { minHeight: 120, borderWidth: 2, borderColor: "#E8D795", borderRadius: 17, padding: 16, color: "#4A3215", fontSize: 18, lineHeight: 26, backgroundColor: "#FFFDF2", textAlignVertical: "top" },
+  answerInput: { minHeight: 130, borderWidth: 2, borderColor: "#E8D795", borderRadius: 17, padding: 16, color: "#4A3215", fontSize: 20, lineHeight: 29, backgroundColor: "#FFFDF2", textAlignVertical: "top" },
   primaryButton: { backgroundColor: "#F0A22D", borderRadius: 17, paddingVertical: 17, alignItems: "center", marginTop: 24, shadowColor: "#C98211", shadowOpacity: 0.28, shadowRadius: 10, shadowOffset: { width: 0, height: 5 }, elevation: 3 },
   primaryText: { color: "#FFFFFF", fontSize: 19, fontWeight: "800" },
   secondaryButton: { borderWidth: 2, borderColor: "#E2D79A", borderRadius: 17, paddingVertical: 14, alignItems: "center", marginTop: 12, backgroundColor: "#FFF9D9" },
@@ -826,7 +816,8 @@ const styles = StyleSheet.create({
   timeText: { color: "#4A3215", fontSize: 29, fontWeight: "900" },
   changeText: { color: "#6C8A4A", fontSize: 15, marginTop: 5, fontWeight: "700" },
   timeInput: { borderWidth: 2, borderColor: "#E2D79A", borderRadius: 17, padding: 14, marginTop: 12, color: "#4A3215", fontSize: 22, backgroundColor: "#FFFDF2" },
-  smallNote: { color: "#847457", fontSize: 14, lineHeight: 20, marginTop: 16, textAlign: "center" },
+  selectAllNote: { color: "#7B5E22", fontSize: 19, lineHeight: 27, fontWeight: "800", marginTop: 20, textAlign: "center" },
+  smallNote: { color: "#847457", fontSize: 17, lineHeight: 24, marginTop: 18, textAlign: "center" },
   resultBox: { backgroundColor: "#FFE8A3", borderRadius: 18, padding: 20, marginBottom: 18 },
   resultText: { color: "#59472B", fontSize: 22, lineHeight: 32, fontWeight: "600" },
 });
