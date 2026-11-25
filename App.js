@@ -10,6 +10,7 @@ import {
   Text,
   TextInput,
   View,
+  Animated,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -358,6 +359,29 @@ export default function App() {
   const [scheduledReminderTime, setScheduledReminderTime] = useState(null);
   const [isThinking, setIsThinking] = useState(false);
   const [webTimeText, setWebTimeText] = useState(formatTimeInput(createDefaultTime()));
+  const [entrance] = useState(() => new Animated.Value(0));
+  const [floatMotion] = useState(() => new Animated.Value(0));
+  const [glowMotion] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    entrance.setValue(0);
+    Animated.timing(entrance, { toValue: 1, duration: 420, useNativeDriver: Platform.OS !== "web" }).start();
+  }, [entrance, screen]);
+
+  useEffect(() => {
+    if (Platform.OS !== "web") return undefined;
+    const floating = Animated.loop(Animated.sequence([
+      Animated.timing(floatMotion, { toValue: 1, duration: 2200, useNativeDriver: false }),
+      Animated.timing(floatMotion, { toValue: 0, duration: 2200, useNativeDriver: false }),
+    ]));
+    const glowing = Animated.loop(Animated.sequence([
+      Animated.timing(glowMotion, { toValue: 1, duration: 3600, useNativeDriver: false }),
+      Animated.timing(glowMotion, { toValue: 0, duration: 3600, useNativeDriver: false }),
+    ]));
+    floating.start();
+    glowing.start();
+    return () => { floating.stop(); glowing.stop(); };
+  }, [floatMotion, glowMotion]);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((saved) => {
@@ -554,13 +578,13 @@ export default function App() {
 
   return (
     <View style={styles.webShell}>
-      <View pointerEvents="none" style={styles.sunGlowLarge} />
+      <Animated.View pointerEvents="none" style={[styles.sunGlowLarge, { opacity: glowMotion.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.48] }), transform: [{ scale: glowMotion.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] }) }] }]} />
       <View pointerEvents="none" style={styles.sunGlowSmall} />
       <SafeAreaView style={styles.safe}>
         <StatusBar style="dark" />
         <ScrollView contentContainerStyle={styles.container}>
           <View style={styles.brandRow}>
-            <View style={styles.brandMark}><Text style={styles.brandMarkText}>☀</Text></View>
+            <Animated.View style={[styles.brandMark, { transform: [{ translateY: floatMotion.interpolate({ inputRange: [0, 1], outputRange: [0, -5] }) }] }]}><Text style={styles.brandMarkText}>☀</Text></Animated.View>
             <View>
               <Text style={styles.logo}>Sunventure</Text>
               <Text style={styles.tagline}>{t.tagline}</Text>
@@ -569,7 +593,7 @@ export default function App() {
           </View>
 
           {screen === "welcome" && (
-            <View style={styles.card}>
+            <Animated.View style={[styles.card, { opacity: entrance, transform: [{ translateY: entrance.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }]}>
               <BackButton onPress={() => setScreen("language")} label={t.back} />
               <Text style={styles.eyebrow}>{t.welcomeEyebrow}</Text>
               <Text style={styles.title}>{t.welcomeTitle}</Text>
@@ -578,11 +602,11 @@ export default function App() {
               <Pressable style={styles.primaryButton} onPress={startQuestions}>
                 <Text style={styles.primaryText}>{t.continue}</Text>
               </Pressable>
-            </View>
+            </Animated.View>
           )}
 
           {screen === "language" && (
-            <View style={styles.card}>
+            <Animated.View style={[styles.card, { opacity: entrance, transform: [{ translateY: entrance.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }]}>
               <Text style={styles.eyebrow}>{t.languageEyebrow}</Text>
               <Text style={styles.title}>
                 {answers.language ? t.languageQuestion : <>What language do you prefer?{"\n"}你喜欢使用哪种语言？{"\n"}¿Qué idioma prefieres?</>}
@@ -595,11 +619,11 @@ export default function App() {
                   <Choice key={item.value} label={item.label} selected={answers.language === item.value} onPress={() => chooseLanguage(item.value)} />
                 ))}
               </View>
-            </View>
+            </Animated.View>
           )}
 
           {screen === "aiQuestion" && (
-            <View style={styles.card}>
+            <Animated.View style={[styles.card, { opacity: entrance, transform: [{ translateY: entrance.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }]}>
               <BackButton onPress={() => setScreen("welcome")} label={t.back} />
               <Text style={styles.eyebrow}>{t.questionEyebrow(questionNumber)}</Text>
               {isThinking ? (
@@ -631,11 +655,11 @@ export default function App() {
               )}
               {isMultiSelectQuestion && <Text style={styles.smallNote}>{t.selectAll}</Text>}
               <Text style={styles.smallNote}>{t.oneQuestion}</Text>
-            </View>
+            </Animated.View>
           )}
 
           {screen === "time" && (
-            <View style={styles.card}>
+            <Animated.View style={[styles.card, { opacity: entrance, transform: [{ translateY: entrance.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }]}>
               <BackButton onPress={() => setScreen("aiQuestion")} label={t.back} />
               <Text style={styles.eyebrow}>{t.reminderEyebrow}</Text>
               <Text style={styles.title}>{t.reminderTitle}</Text>
@@ -662,7 +686,7 @@ export default function App() {
                 <Text style={styles.primaryText}>{isThinking ? t.findingActivity : t.findActivity}</Text>
               </Pressable>
               <Text style={styles.smallNote}>{t.useAnswers}</Text>
-            </View>
+            </Animated.View>
           )}
 
           {screen === "result" && (
