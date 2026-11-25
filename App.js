@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Linking,
   Platform,
   Pressable,
   SafeAreaView,
@@ -37,6 +38,24 @@ function parseTimeInput(value) {
   const minutes = Number(match[2]);
   if (hours > 23 || minutes > 59) return null;
   return { hours, minutes };
+}
+
+function normalizeActivity(item) {
+  if (typeof item === "string") {
+    const title = item.split(/[.!?]/)[0].trim() || item.trim();
+    return { title, description: item.trim(), example: "", resourceQuery: title };
+  }
+  const title = typeof item?.title === "string" ? item.title.trim() : "Sunventure activity";
+  return {
+    title,
+    description: typeof item?.description === "string" ? item.description.trim() : "",
+    example: typeof item?.example === "string" ? item.example.trim() : "",
+    resourceQuery: typeof item?.resourceQuery === "string" ? item.resourceQuery.trim() : title,
+  };
+}
+
+function activityResourceUrl(activity) {
+  return `https://www.google.com/search?q=${encodeURIComponent(`${activity.resourceQuery || activity.title} simple guide`)}`;
 }
 
 function escapeCalendarText(value) {
@@ -181,6 +200,7 @@ const translations = {
     selectedActivity: (activity) => `You chose: ${activity}`,
     differentIdea: "Want different ideas? Go back and change an answer.",
     tryAnother: "Try another idea",
+    resourceLink: "Find a simple guide online ↗",
     questionErrorTitle: "Sunventure could not ask the next question",
     answerErrorTitle: "Sunventure could not answer",
     webError: "Please check the online AI function and try again.",
@@ -225,6 +245,7 @@ const translations = {
     selectedActivity: (activity) => `你选择了：${activity}`,
     differentIdea: "想换一些点子？返回并修改答案。",
     tryAnother: "再试一个点子",
+    resourceLink: "在线查找简单指南 ↗",
     questionErrorTitle: "Sunventure 无法提出下一个问题",
     answerErrorTitle: "Sunventure 无法回答",
     webError: "请检查在线 AI 功能，然后再试一次。",
@@ -269,6 +290,7 @@ const translations = {
     selectedActivity: (activity) => `Elegiste: ${activity}`,
     differentIdea: "¿Quieres otras ideas? Regresa y cambia una respuesta.",
     tryAnother: "Probar otra idea",
+    resourceLink: "Buscar una guía sencilla en línea ↗",
     questionErrorTitle: "Sunventure no pudo hacer la siguiente pregunta",
     answerErrorTitle: "Sunventure no pudo responder",
     webError: "Revisa la función de IA en línea e inténtalo de nuevo.",
@@ -329,7 +351,7 @@ export default function App() {
   const [answer, setAnswer] = useState("");
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [activities, setActivities] = useState([]);
-  const [selectedActivity, setSelectedActivity] = useState("");
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const [reminderSet, setReminderSet] = useState(false);
   const [reminderCancelled, setReminderCancelled] = useState(false);
   const [reminderId, setReminderId] = useState("");
@@ -468,7 +490,7 @@ export default function App() {
     try {
       const data = await requestAI({ mode: "activity", language: answers.language, answers: questionAnswers, previousActivities });
       if (!Array.isArray(data.activities) || data.activities.length < 3) throw new Error("Not enough activities returned");
-      setActivities(data.activities.slice(0, 3));
+      setActivities(data.activities.slice(0, 3).map(normalizeActivity));
       setScreen("result");
     } catch (error) {
       const message = error.message || (Platform.OS === "web" ? t.webError : t.nativeAnswerError);
@@ -484,7 +506,7 @@ export default function App() {
   async function confirmActivity() {
     if (!selectedActivity || reminderSet) return;
     try {
-      const scheduled = await scheduleReminder(selectedActivity.split(".")[0]);
+      const scheduled = await scheduleReminder(selectedActivity.title);
       if (scheduled) {
         setReminderId(scheduled.id);
         setScheduledReminderTime(scheduled.time);
@@ -500,7 +522,7 @@ export default function App() {
     if (!reminderSet || !reminderId || !scheduledReminderTime) return;
     try {
       if (Platform.OS === "web") {
-        downloadCalendarCancellation(selectedActivity.split(".")[0], scheduledReminderTime, reminderId);
+        downloadCalendarCancellation(selectedActivity.title, scheduledReminderTime, reminderId);
       } else {
         await Notifications.cancelScheduledNotificationAsync(reminderId);
       }
@@ -642,10 +664,17 @@ export default function App() {
               <Text style={styles.title}>{t.resultTitle}</Text>
               <View style={styles.activityChoices}>
                 {activities.map((item, index) => (
-                  <Choice key={`${index}-${item}`} label={`${index + 1}. ${item}`} selected={selectedActivity === item} onPress={() => setSelectedActivity(item)} />
+                  <View key={`${index}-${item.title}`} style={styles.activityCard}>
+                    <Choice label={`${index + 1}. ${item.title}`} selected={selectedActivity?.title === item.title} onPress={() => setSelectedActivity(item)} />
+                    {item.description ? <Text style={styles.activityDetails}>{item.description}</Text> : null}
+                    {item.example ? <Text style={styles.activityExample}>{item.example}</Text> : null}
+                    <Pressable accessibilityRole="link" style={styles.resourceButton} onPress={() => Linking.openURL(activityResourceUrl(item))}>
+                      <Text style={styles.resourceText}>{t.resourceLink}</Text>
+                    </Pressable>
+                  </View>
                 ))}
               </View>
-              {selectedActivity && <Text style={styles.safety}>{t.selectedActivity(selectedActivity)}</Text>}
+              {selectedActivity && <Text style={styles.safety}>{t.selectedActivity(selectedActivity.title)}</Text>}
               <Pressable disabled={!selectedActivity || reminderSet} style={[styles.primaryButton, (!selectedActivity || reminderSet) && styles.disabled]} onPress={confirmActivity}>
                 <Text style={styles.primaryText}>{t.setReminder}</Text>
               </Pressable>
@@ -656,7 +685,7 @@ export default function App() {
                 </Pressable>
               )}
               <Text style={styles.smallNote}>{t.differentIdea}</Text>
-              <Pressable disabled={isThinking} style={[styles.primaryButton, isThinking && styles.disabled]} onPress={() => findActivity({ previousActivities: activities })}>
+              <Pressable disabled={isThinking} style={[styles.primaryButton, isThinking && styles.disabled]} onPress={() => findActivity({ previousActivities: activities.map((item) => item.title) })}>
                 <Text style={styles.primaryText}>{isThinking ? t.findingActivity : t.tryAnother}</Text>
               </Pressable>
             </View>
@@ -678,6 +707,11 @@ const styles = StyleSheet.create({
   title: { color: "#27231E", fontSize: 31, fontWeight: "800", lineHeight: 38, marginBottom: 12 },
   body: { color: "#675F53", fontSize: 18, lineHeight: 27, marginBottom: 20 },
   safety: { color: "#31735A", fontSize: 16, lineHeight: 23, marginBottom: 20 },
+  activityCard: { backgroundColor: "#FFF8E8", borderRadius: 18, padding: 10, marginBottom: 12 },
+  activityDetails: { color: "#675F53", fontSize: 16, lineHeight: 23, paddingHorizontal: 14, marginTop: 2 },
+  activityExample: { color: "#31735A", fontSize: 15, lineHeight: 22, paddingHorizontal: 14, marginTop: 6 },
+  resourceButton: { alignSelf: "flex-start", paddingHorizontal: 14, paddingVertical: 10 },
+  resourceText: { color: "#B5661B", fontSize: 15, fontWeight: "700", textDecorationLine: "underline" },
   choices: { gap: 10 },
   choice: { borderWidth: 2, borderColor: "#E8DFD1", borderRadius: 14, paddingVertical: 14, paddingHorizontal: 16, backgroundColor: "#FFFCF6" },
   choiceSelected: { borderColor: "#F28C28", backgroundColor: "#FFF0D4" },
