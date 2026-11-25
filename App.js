@@ -22,6 +22,7 @@ const AI_HELPER_URL = "http://192.168.1.163:8787";
 const STORAGE_KEY = "sunventure-v1-answers";
 const AI_QUESTION_COUNT = 7;
 const MULTI_SELECT_QUESTION_NUMBERS = [1, 5, 7];
+const MUSIC_VOLUME_LEVELS = [0.2, 0.5, 0.8];
 const SOFT_MUSIC_SOURCE = "https://www.scottbuckley.com.au/library/wp-content/uploads/2017/07/sb_elementary.mp3";
 
 function createDefaultTime() {
@@ -213,6 +214,7 @@ const translations = {
     notificationBody: (title) => `It is time for ${title}.`,
     playMusic: "Play soft music",
     stopMusic: "Turn music off",
+    volume: (value) => `Volume ${value}%`,
   },
   Chinese: {
     tagline: "让每一天更明亮的简单点子。",
@@ -260,6 +262,7 @@ const translations = {
     notificationBody: (title) => `现在是进行${title}的时间。`,
     playMusic: "播放轻柔音乐",
     stopMusic: "关闭音乐",
+    volume: (value) => `音量 ${value}%`,
   },
   Spanish: {
     tagline: "Una idea sencilla para un día más alegre.",
@@ -307,6 +310,7 @@ const translations = {
     notificationBody: (title) => `Es hora de ${title}.`,
     playMusic: "Poner música suave",
     stopMusic: "Apagar la música",
+    volume: (value) => `Volumen ${value}%`,
   },
 };
 
@@ -369,6 +373,7 @@ export default function App() {
   const [webTimeText, setWebTimeText] = useState(formatTimeInput(createDefaultTime()));
   const music = useAudioPlaylist({ sources: [SOFT_MUSIC_SOURCE], loop: "single" });
   const [musicPlaying, setMusicPlaying] = useState(false);
+  const [musicVolume, setMusicVolume] = useState(MUSIC_VOLUME_LEVELS[0]);
   const [entrance] = useState(() => new Animated.Value(0));
   const [floatMotion] = useState(() => new Animated.Value(0));
   const [glowMotion] = useState(() => new Animated.Value(0));
@@ -400,11 +405,23 @@ export default function App() {
         setMusicPlaying(false);
         return;
       }
+      // expo-audio exposes volume as a supported AudioPlaylist property.
+      // eslint-disable-next-line react-hooks/immutability
+      music.volume = musicVolume;
       music.play();
       setMusicPlaying(true);
     } catch {
       setMusicPlaying(false);
     }
+  }
+
+  function changeMusicVolume() {
+    const currentIndex = MUSIC_VOLUME_LEVELS.indexOf(musicVolume);
+    const nextVolume = MUSIC_VOLUME_LEVELS[(currentIndex + 1) % MUSIC_VOLUME_LEVELS.length];
+    setMusicVolume(nextVolume);
+    // expo-audio exposes volume as a supported AudioPlaylist property.
+    // eslint-disable-next-line react-hooks/immutability
+    music.volume = nextVolume;
   }
 
   useEffect(() => {
@@ -615,9 +632,14 @@ export default function App() {
             </View>
             <View style={styles.headerActions}>
               <View style={styles.brandPill}><Text style={styles.brandPillText}>AI + YOU</Text></View>
-              <Pressable accessibilityRole="button" accessibilityState={{ selected: musicPlaying }} style={[styles.musicButton, musicPlaying && styles.musicButtonOn]} onPress={toggleMusic}>
-                <Text style={styles.musicButtonText}>{musicPlaying ? `🔊 ${t.stopMusic}` : `🎵 ${t.playMusic}`}</Text>
-              </Pressable>
+              <View style={styles.musicControls}>
+                <Pressable accessibilityRole="button" accessibilityState={{ selected: musicPlaying }} style={[styles.musicButton, musicPlaying && styles.musicButtonOn]} onPress={toggleMusic}>
+                  <Text style={styles.musicButtonText}>{musicPlaying ? `🔊 ${t.stopMusic}` : `🎵 ${t.playMusic}`}</Text>
+                </Pressable>
+                <Pressable accessibilityRole="button" accessibilityLabel={t.volume(Math.round(musicVolume * 100))} style={styles.volumeButton} onPress={changeMusicVolume}>
+                  <Text style={styles.volumeButtonText}>🔉 {t.volume(Math.round(musicVolume * 100))}</Text>
+                </Pressable>
+              </View>
             </View>
           </View>
 
@@ -769,11 +791,14 @@ const styles = StyleSheet.create({
   logo: { color: "#4A3215", fontSize: 30, fontWeight: "900", letterSpacing: 0.3 },
   tagline: { color: "#80683B", fontSize: 15, marginTop: 3 },
   headerActions: { marginLeft: "auto", alignItems: "flex-end", gap: 8 },
+  musicControls: { flexDirection: "row", alignItems: "center", gap: 6 },
   brandPill: { backgroundColor: "#FFF0A8", borderRadius: 20, paddingHorizontal: 13, paddingVertical: 9, borderWidth: 1, borderColor: "#F2D36B" },
   brandPillText: { color: "#956A08", fontSize: 11, fontWeight: "900", letterSpacing: 1 },
   musicButton: { borderRadius: 18, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: "#FFFDF2", borderWidth: 1, borderColor: "#E2D79A" },
   musicButtonOn: { backgroundColor: "#FFE8A3", borderColor: "#F0A22D" },
   musicButtonText: { color: "#6B531F", fontSize: 13, fontWeight: "800" },
+  volumeButton: { borderRadius: 18, paddingHorizontal: 10, paddingVertical: 8, backgroundColor: "#FFFDF2", borderWidth: 1, borderColor: "#E2D79A" },
+  volumeButtonText: { color: "#6B531F", fontSize: 13, fontWeight: "800" },
   card: { backgroundColor: "#FFFDF2", borderRadius: 30, padding: 26, borderWidth: 1, borderColor: "#FFFFFF", shadowColor: "#B38324", shadowOpacity: 0.2, shadowRadius: 25, shadowOffset: { width: 0, height: 13 }, elevation: 5 },
   eyebrow: { color: "#C47713", fontSize: 12, fontWeight: "900", letterSpacing: 1.5, marginBottom: 11 },
   title: { color: "#4A3215", fontSize: 32, fontWeight: "900", lineHeight: 39, marginBottom: 13 },
