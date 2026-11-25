@@ -22,7 +22,7 @@ const AI_HELPER_URL = "http://192.168.1.163:8787";
 const STORAGE_KEY = "sunventure-v1-answers";
 const AI_QUESTION_COUNT = 7;
 const MULTI_SELECT_QUESTION_NUMBERS = [1, 5, 7];
-const SOFT_MUSIC_SOURCE = "https://archive.org/download/kjv_waggoner_40kbps/01_GEN_02.mp3";
+const SOFT_MUSIC_SOURCE = "https://www.scottbuckley.com.au/library/wp-content/uploads/2017/07/sb_elementary.mp3";
 
 function createDefaultTime() {
   const time = new Date();
