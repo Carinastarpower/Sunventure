@@ -25,6 +25,14 @@ function asksForHardToKnowFact(question) {
   return /\bhow many\b|\bwhat year\b|\bwhat date\b|\bwhat is your (diagnosis|medication|blood pressure|address)\b|\bname (three|five)\b|\bexplain\b|\bdescribe in detail\b|\bwhat is the name of\b|\bremember when\b/i.test(question || "");
 }
 
+function normalizeActivityResult(item) {
+  if (item && typeof item === "object") return item;
+  const text = String(item || "").trim();
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const title = (sentences.shift() || text).replace(/[:.]$/, "").trim();
+  return { title, description: text, example: sentences.join(" ") || "Start with this simple step.", resourceQuery: title };
+}
+
 async function createResponse({ instructions, input }) {
   const request = async (apiKey) => {
     const client = new OpenAI({ apiKey });
@@ -105,9 +113,9 @@ export default async function handler(request, response) {
     let activities = [];
     try {
       const parsed = parseJson(completion.output_text);
-      activities = Array.isArray(parsed.activities) ? parsed.activities : [];
+      activities = Array.isArray(parsed.activities) ? parsed.activities.map(normalizeActivityResult) : [];
     } catch {
-      activities = completion.output_text.split(/\n+/).map((item) => item.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean).slice(0, 3);
+      activities = completion.output_text.split(/\n+/).map((item) => item.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean).slice(0, 3).map(normalizeActivityResult);
     }
     if (activities.length < 3) {
       sendJson(response, 500, { error: { message: "The activity helper could not find enough ideas.", fix: "Try the request again once; if it continues, check the AI helper logs." } });
