@@ -554,11 +554,19 @@ export default function App() {
 
   return (
     <View style={styles.webShell}>
+      <View pointerEvents="none" style={styles.sunGlowLarge} />
+      <View pointerEvents="none" style={styles.sunGlowSmall} />
       <SafeAreaView style={styles.safe}>
         <StatusBar style="dark" />
         <ScrollView contentContainerStyle={styles.container}>
-          <Text style={styles.logo}>☀ Sunventure</Text>
-          <Text style={styles.tagline}>{t.tagline}</Text>
+          <View style={styles.brandRow}>
+            <View style={styles.brandMark}><Text style={styles.brandMarkText}>☀</Text></View>
+            <View>
+              <Text style={styles.logo}>Sunventure</Text>
+              <Text style={styles.tagline}>{t.tagline}</Text>
+            </View>
+            <View style={styles.brandPill}><Text style={styles.brandPillText}>AI + YOU</Text></View>
+          </View>
 
           {screen === "welcome" && (
             <View style={styles.card}>
@@ -697,39 +705,46 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  webShell: Platform.select({ web: { flex: 1, alignItems: "center", backgroundColor: "#E8E3D9" }, default: { flex: 1 } }),
-  safe: Platform.select({ web: { flex: 1, width: "100%", backgroundColor: "#FFF8E8" }, default: { flex: 1, backgroundColor: "#FFF8E8" } }),
-  container: { flexGrow: 1, padding: 24, paddingTop: 36, justifyContent: "center" },
-  logo: { color: "#F28C28", fontSize: 27, fontWeight: "800", letterSpacing: 0.3 },
-  tagline: { color: "#675F53", fontSize: 16, marginTop: 4, marginBottom: 22 },
-  card: { backgroundColor: "#FFFFFF", borderRadius: 24, padding: 24, shadowColor: "#8C6A2D", shadowOpacity: 0.12, shadowRadius: 16, elevation: 3 },
-  eyebrow: { color: "#B5661B", fontSize: 13, fontWeight: "800", letterSpacing: 1.2, marginBottom: 10 },
-  title: { color: "#27231E", fontSize: 31, fontWeight: "800", lineHeight: 38, marginBottom: 12 },
-  body: { color: "#675F53", fontSize: 18, lineHeight: 27, marginBottom: 20 },
-  safety: { color: "#31735A", fontSize: 16, lineHeight: 23, marginBottom: 20 },
+  webShell: Platform.select({ web: { flex: 1, alignItems: "center", backgroundColor: "#F4EDE3", overflow: "hidden" }, default: { flex: 1 } }),
+  safe: Platform.select({ web: { flex: 1, width: "100%", backgroundColor: "transparent" }, default: { flex: 1, backgroundColor: "#FFF8E8" } }),
+  sunGlowLarge: Platform.select({ web: { position: "absolute", width: 520, height: 520, borderRadius: 260, backgroundColor: "#FFE7AA", opacity: 0.38, top: -260, right: -110 }, default: { display: "none" } }),
+  sunGlowSmall: Platform.select({ web: { position: "absolute", width: 240, height: 240, borderRadius: 120, backgroundColor: "#CDEFE3", opacity: 0.5, bottom: -100, left: -70 }, default: { display: "none" } }),
+  container: { flexGrow: 1, padding: 24, paddingTop: 32, paddingBottom: 42, justifyContent: "center" },
+  brandRow: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
+  brandMark: { width: 50, height: 50, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: "#FFB35C", marginRight: 12, shadowColor: "#D77B27", shadowOpacity: 0.25, shadowRadius: 12, elevation: 4 },
+  brandMarkText: { color: "#FFFFFF", fontSize: 29, fontWeight: "800" },
+  logo: { color: "#213B59", fontSize: 29, fontWeight: "900", letterSpacing: 0.3 },
+  tagline: { color: "#6F756F", fontSize: 15, marginTop: 3 },
+  brandPill: { marginLeft: "auto", backgroundColor: "#DDF4EA", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 8 },
+  brandPillText: { color: "#2F8064", fontSize: 11, fontWeight: "900", letterSpacing: 1 },
+  card: { backgroundColor: "#FFFFFF", borderRadius: 30, padding: 26, borderWidth: 1, borderColor: "rgba(255,255,255,0.85)", shadowColor: "#45606C", shadowOpacity: 0.16, shadowRadius: 24, shadowOffset: { width: 0, height: 12 }, elevation: 5 },
+  eyebrow: { color: "#E0783F", fontSize: 12, fontWeight: "900", letterSpacing: 1.5, marginBottom: 11 },
+  title: { color: "#213B59", fontSize: 32, fontWeight: "900", lineHeight: 39, marginBottom: 13 },
+  body: { color: "#66716F", fontSize: 18, lineHeight: 27, marginBottom: 20 },
+  safety: { color: "#2F8064", fontSize: 16, lineHeight: 23, marginBottom: 20 },
   activityCard: { backgroundColor: "#FFF8E8", borderRadius: 18, padding: 10, marginBottom: 12 },
-  activityDetails: { color: "#675F53", fontSize: 16, lineHeight: 23, paddingHorizontal: 14, marginTop: 2 },
+  activityDetails: { color: "#596B6C", fontSize: 16, lineHeight: 23, paddingHorizontal: 14, marginTop: 2 },
   activityExample: { color: "#31735A", fontSize: 15, lineHeight: 22, paddingHorizontal: 14, marginTop: 6 },
   resourceButton: { alignSelf: "flex-start", paddingHorizontal: 14, paddingVertical: 10 },
   resourceText: { color: "#B5661B", fontSize: 15, fontWeight: "700", textDecorationLine: "underline" },
   choices: { gap: 10 },
-  choice: { borderWidth: 2, borderColor: "#E8DFD1", borderRadius: 14, paddingVertical: 14, paddingHorizontal: 16, backgroundColor: "#FFFCF6" },
-  choiceSelected: { borderColor: "#F28C28", backgroundColor: "#FFF0D4" },
-  choiceText: { color: "#3B352D", fontSize: 18, fontWeight: "600" },
-  choiceTextSelected: { color: "#8D4C0B" },
-  answerInput: { minHeight: 120, borderWidth: 2, borderColor: "#E8DFD1", borderRadius: 14, padding: 16, color: "#27231E", fontSize: 18, lineHeight: 26, backgroundColor: "#FFFCF6", textAlignVertical: "top" },
-  primaryButton: { backgroundColor: "#F28C28", borderRadius: 14, paddingVertical: 16, alignItems: "center", marginTop: 24 },
+  choice: { borderWidth: 2, borderColor: "#E1E8E2", borderRadius: 17, paddingVertical: 15, paddingHorizontal: 17, backgroundColor: "#FBFDFC" },
+  choiceSelected: { borderColor: "#F39A4A", backgroundColor: "#FFF0D4", shadowColor: "#E49A4A", shadowOpacity: 0.14, shadowRadius: 8, elevation: 2 },
+  choiceText: { color: "#304B58", fontSize: 18, fontWeight: "700" },
+  choiceTextSelected: { color: "#9A551F" },
+  answerInput: { minHeight: 120, borderWidth: 2, borderColor: "#E1E8E2", borderRadius: 17, padding: 16, color: "#213B59", fontSize: 18, lineHeight: 26, backgroundColor: "#FBFDFC", textAlignVertical: "top" },
+  primaryButton: { backgroundColor: "#E97D43", borderRadius: 17, paddingVertical: 17, alignItems: "center", marginTop: 24, shadowColor: "#C95F2F", shadowOpacity: 0.25, shadowRadius: 10, shadowOffset: { width: 0, height: 5 }, elevation: 3 },
   primaryText: { color: "#FFFFFF", fontSize: 19, fontWeight: "800" },
-  secondaryButton: { borderWidth: 2, borderColor: "#E8DFD1", borderRadius: 14, paddingVertical: 14, alignItems: "center", marginTop: 12, backgroundColor: "#FFFCF6" },
-  secondaryText: { color: "#8D4C0B", fontSize: 17, fontWeight: "800" },
+  secondaryButton: { borderWidth: 2, borderColor: "#D9E8E0", borderRadius: 17, paddingVertical: 14, alignItems: "center", marginTop: 12, backgroundColor: "#F4FBF7" },
+  secondaryText: { color: "#34705F", fontSize: 17, fontWeight: "800" },
   disabled: { opacity: 0.45 },
   backButton: { alignSelf: "flex-start", marginBottom: 18 },
-  backText: { color: "#8D4C0B", fontSize: 17, fontWeight: "700" },
-  timeButton: { borderWidth: 2, borderColor: "#E8DFD1", borderRadius: 16, padding: 18, backgroundColor: "#FFFCF6" },
-  timeText: { color: "#27231E", fontSize: 27, fontWeight: "800" },
-  changeText: { color: "#8D4C0B", fontSize: 15, marginTop: 5 },
-  timeInput: { borderWidth: 2, borderColor: "#E8DFD1", borderRadius: 14, padding: 14, marginTop: 12, color: "#27231E", fontSize: 22, backgroundColor: "#FFFCF6" },
-  smallNote: { color: "#766D60", fontSize: 14, lineHeight: 20, marginTop: 16, textAlign: "center" },
+  backText: { color: "#34705F", fontSize: 17, fontWeight: "800" },
+  timeButton: { borderWidth: 2, borderColor: "#D9E8E0", borderRadius: 20, padding: 19, backgroundColor: "#F4FBF7" },
+  timeText: { color: "#213B59", fontSize: 29, fontWeight: "900" },
+  changeText: { color: "#34705F", fontSize: 15, marginTop: 5, fontWeight: "700" },
+  timeInput: { borderWidth: 2, borderColor: "#D9E8E0", borderRadius: 17, padding: 14, marginTop: 12, color: "#213B59", fontSize: 22, backgroundColor: "#FBFDFC" },
+  smallNote: { color: "#77817D", fontSize: 14, lineHeight: 20, marginTop: 16, textAlign: "center" },
   resultBox: { backgroundColor: "#FFF0D4", borderRadius: 18, padding: 20, marginBottom: 18 },
-  resultText: { color: "#3B352D", fontSize: 22, lineHeight: 32, fontWeight: "600" },
+  resultText: { color: "#304B58", fontSize: 22, lineHeight: 32, fontWeight: "600" },
 });
